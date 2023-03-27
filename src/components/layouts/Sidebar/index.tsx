@@ -5,7 +5,7 @@ import Link from "next/link";
 const links = [
   { href: "/generate-codes", label: "Code Generation" },
   { href: "/qr-code-redemption", label: "Code Redemption" },
-  { href: "/balance-and-transactions", label: "Balance & Transactions" },
+  { href: "/transactions", label: "Balance & Transactions" },
 ];
 
 const Sidebar: React.FC = () => {

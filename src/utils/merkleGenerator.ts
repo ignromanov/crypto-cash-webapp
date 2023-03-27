@@ -17,16 +17,12 @@ function generateSecretCodes(count: number): string[] {
 
 function generateMerkleTreeAndProofs(secretCodes: string[], amount: number) {
   const leaves = secretCodes.map((code, index) => {
-    const data = `${code}${amount}`;
+    const data = `${code}:${amount}`;
     return keccak256(Buffer.from(data));
   });
 
   const merkleTree = new MerkleTree(leaves, keccak256);
-  const merkleProofs = secretCodes.map((code, index) => {
-    return merkleTree.getProof(leaves[index]);
-  });
-
-  return { merkleTree, merkleProofs };
+  return merkleTree;
 }
 
 export { generateSecretCodes, generateMerkleTreeAndProofs };

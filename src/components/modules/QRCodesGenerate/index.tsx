@@ -23,7 +23,7 @@ const QRCodesGenerate = () => {
         updateApiStatus({
           pending: false,
           success: true,
-          message: "Secret codes generated successfully!",
+          message: `Secret codes generated successfully with RootIndex: ${response.data.merkleRootIndex}!`,
         });
       }
     } catch (error) {

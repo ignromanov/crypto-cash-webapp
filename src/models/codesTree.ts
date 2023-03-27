@@ -3,11 +3,9 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ICodesTree extends Document {
   merkleRoot: string;
   merkleRootIndex: number;
+  amount: number;
   merkleLeaves: string[];
-  codes: Array<{
-    secretCode: string;
-    amount: number;
-  }>;
+  secretCodes: string[];
 }
 
 const CodesTreeSchema = new Schema({
@@ -20,22 +18,20 @@ const CodesTreeSchema = new Schema({
     required: true,
     default: -1,
   },
+  amount: {
+    type: Number,
+    required: true,
+  },
   merkleLeaves: [
     {
       type: String,
       required: true,
     },
   ],
-  codes: [
+  secretCodes: [
     {
-      secretCode: {
-        type: String,
-        required: true,
-      },
-      amount: {
-        type: Number,
-        required: true,
-      },
+      type: String,
+      required: true,
     },
   ],
 });
