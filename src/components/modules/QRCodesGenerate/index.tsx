@@ -2,11 +2,46 @@ import React, { FormEvent, useState } from "react";
 import useApiStatus from "@/hooks/useApiStatus";
 import axios from "axios";
 import ApiStatusDisplay from "../../elements/ApiStatusDisplay";
+import { useMetamask } from "@/hooks/useMetamask";
+import Card from "@/components/layouts/Card";
 
 const QRCodesGenerate = () => {
+  const { provider, account } = useMetamask();
   const [numberOfCodes, setNumberOfCodes] = useState("");
   const [amount, setAmount] = useState("");
   const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
+
+  function getMessageToSign(
+    amount: string,
+    numberOfCodes: string,
+    timestamp: number
+  ) {
+    return `Generate Codes Request\nAmount: ${amount}\nNumber of Codes: ${numberOfCodes}\nTimestamp: ${timestamp}`;
+  }
+
+  async function signMessage(message: string) {
+    if (!provider) {
+      return "";
+    }
+    const signer = await provider.getSigner();
+    const signature = await signer.signMessage(message);
+    return signature;
+  }
+
+  async function sendRequest(amount: string, numberOfCodes: string) {
+    const timestamp = Date.now();
+    const messageToSign = getMessageToSign(amount, numberOfCodes, timestamp);
+    const signature = await signMessage(messageToSign);
+
+    const response = await axios.post("/api/generate-codes", {
+      amount,
+      numberOfCodes,
+      signature,
+      timestamp,
+    });
+
+    return response;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -14,11 +49,7 @@ const QRCodesGenerate = () => {
     updateApiStatus({ ...apiStatus, pending: true });
 
     try {
-      const response = await axios.post("/api/generate-codes", {
-        amount,
-        numberOfCodes,
-      });
-
+      const response = await sendRequest(amount, numberOfCodes);
       if (response.status === 201) {
         updateApiStatus({
           pending: false,

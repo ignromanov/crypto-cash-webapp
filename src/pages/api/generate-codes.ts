@@ -5,13 +5,64 @@ import {
   generateMerkleTreeAndProofs as generateMerkleTree,
 } from "@/utils/merkleGenerator";
 import connectToDatabase from "@/utils/mongoose";
-import codesFactory from "@/contracts/codesFactory";
+import { ethers, JsonRpcProvider, verifyMessage } from "ethers";
+import {
+  codesFactoryContractAddress,
+  CodesFactoryArtifactAbi,
+  CodesFactoryContractType,
+} from "@/contracts/codesFactory";
+
+async function verifySignature(message: string, signature: string) {
+  const recoveredAddress = verifyMessage(message, signature);
+  const contractOwner = process.env.NEXT_PUBLIC_DEPLOYER_ADDRESS || "";
+  return recoveredAddress === contractOwner;
+}
+
+function getCodesFactoryContract() {
+  const provider = new JsonRpcProvider(process.env.RPC_URL);
+  const signer = new ethers.Wallet(
+    process.env.DEPLOYER_PRIVATE_KEY || "",
+    provider
+  );
+
+  const codesFactoryContractWrite = new ethers.BaseContract(
+    codesFactoryContractAddress,
+    CodesFactoryArtifactAbi,
+    signer
+  ) as unknown as CodesFactoryContractType;
+
+  return codesFactoryContractWrite;
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   await connectToDatabase();
 
   if (req.method === "POST") {
-    const { numberOfCodes, amount } = req.body;
+    const { amount, numberOfCodes, signature, timestamp } = req.body;
+
+    // Check if the request has all the required fields
+    if (!amount || !numberOfCodes || !signature || !timestamp) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+
+    // Check if the timestamp is recent (e.g., within the last 5 minutes)
+    const currentTime = Date.now();
+    if (currentTime - timestamp > 5 * 60 * 1000) {
+      res.status(400).json({ error: "Timestamp is too old" });
+      return;
+    }
+
+    // Create the message to verify
+    const message = `Generate Codes Request\nAmount: ${amount}\nNumber of Codes: ${numberOfCodes}\nTimestamp: ${timestamp}`;
+
+    // Verify the signature
+    const isValid = await verifySignature(message, signature);
+
+    if (!isValid) {
+      res.status(403).json({ error: "Invalid signature" });
+      return;
+    }
 
     // Generate secret codes and Merkle tree
     const secretCodes = generateSecretCodes(numberOfCodes);
@@ -28,7 +79,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     try {
       // Call the addMerkleRoot function from the CodesFactory contract
-      const addMerkleRootTx = await codesFactory.addMerkleRoot(merkleRoot);
+      const codesFactoryContractWrite = getCodesFactoryContract();
+      const addMerkleRootTx = await codesFactoryContractWrite.addMerkleRoot(
+        merkleRoot,
+        numberOfCodes,
+        amount
+      );
       const txReceipt = await addMerkleRootTx.wait();
 
       if (txReceipt.status !== 1) {
@@ -36,7 +92,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Get the Merkle tree index from the transaction event
-      codesTreeToInsert.merkleRootIndex = Number(txReceipt.logs[0].args[0]);
+      codesTreeToInsert.merkleRootIndex = Number(txReceipt.logs[1].args[0]);
 
       // Save the Merkle tree root and codes in the database
       const insertedCodesTree = await CodesTree.create(codesTreeToInsert);
