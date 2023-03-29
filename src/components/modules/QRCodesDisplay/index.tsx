@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import useApiStatus from "../../../hooks/useApiStatus";
+import React, { useCallback, useState } from "react";
+import useApiStatus from "@/hooks/useApiStatus";
 import axios from "axios";
-import ApiStatusDisplay from "../../elements/ApiStatusDisplay";
+import ApiStatusDisplay from "@/components/elements/ApiStatusDisplay";
+import Card from "@/components/layouts/Card";
 
 const QrCodesDisplay = () => {
   const [merkleRootIndex, setMerkleRootIndex] = useState("");
   const [includeProof, setIncludeProof] = useState(false);
-  const [qrCodes, setQrCodes] = useState([]);
+  const [qrCodes, setQrCodes] = useState<string[]>([]);
+  const [amount, setAmount] = useState("");
   const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -20,7 +22,9 @@ const QrCodesDisplay = () => {
       });
 
       if (response.status === 200) {
-        setQrCodes(response.data);
+        setQrCodes(response.data.qrCodes);
+        setAmount(response.data.amount);
+
         updateApiStatus({
           pending: false,
           success: true,
@@ -36,8 +40,17 @@ const QrCodesDisplay = () => {
     }
   };
 
+  const handleQrCodeClick = async (qrCode: string) => {
+    try {
+      await navigator.clipboard.writeText(qrCode);
+      alert("QR code copied to clipboard");
+    } catch (error) {
+      alert("Failed to copy QR code to clipboard");
+    }
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
+    <Card>
       <h2 className="text-xl font-semibold mb-4">Display QR Codes</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -72,10 +85,18 @@ const QrCodesDisplay = () => {
         </button>
         <ApiStatusDisplay apiStatus={apiStatus} />
       </form>
+      {qrCodes.length > 0 && (
+        <p className="mt-4">
+          Amount: <strong>{amount}</strong>
+        </p>
+      )}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {qrCodes.map((qrCode, index) => (
-          <div key={index} className="bg-gray-100 p-4 rounded-lg">
-            {/* Replace with the appropriate QR code component */}
+          <div
+            key={index}
+            className="bg-gray-100 p-4 rounded-lg hover:cursor-pointer"
+            onClick={() => handleQrCodeClick(qrCode)}
+          >
             <img
               src={qrCode}
               alt={`QR Code ${index + 1}`}
@@ -84,7 +105,7 @@ const QrCodesDisplay = () => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };
 

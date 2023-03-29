@@ -36,7 +36,7 @@ const CodesTreeSchema = new Schema({
   ],
 });
 
-CodesTreeSchema.index({ merkleRootIndex: 1, "codes.secretCode": 1 });
+CodesTreeSchema.index({ merkleRootIndex: 1, secretCodes: 1 });
 
 export const CodesTree =
   mongoose.models.CodesTree ||

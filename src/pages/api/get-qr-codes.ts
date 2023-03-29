@@ -3,14 +3,17 @@ import { MerkleTree } from "merkletreejs";
 import { ICodesTree, CodesTree } from "@/models/codesTree";
 import { bufferify } from "@/utils/bufferify";
 import { generateQrCode } from "@/utils/generateQrCode";
+import connectToDatabase from "@/utils/mongoose";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { merkleRootIndex, includeProof } = req.query;
   const withProof = includeProof === "true";
 
   if (typeof merkleRootIndex === "string") {
+    await connectToDatabase();
+
     const codesTree: ICodesTree | null = await CodesTree.findOne({
-      merkleRootIndex,
+      merkleRootIndex: Number(merkleRootIndex),
     });
 
     if (codesTree) {
@@ -19,13 +22,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         bufferify,
         { isBitcoinTree: true }
       );
+      const amount = codesTree.amount;
 
       const qrCodes = await Promise.all(
-        codesTree.codes.map(async (code, index) => {
+        codesTree.secretCodes.map(async (code, index) => {
           const data: any = {
             merkleRootIndex,
-            secretCode: code.secretCode,
-            amount: code.amount,
+            secretCode: code,
+            amount,
           };
 
           if (withProof) {
@@ -44,7 +48,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         })
       );
 
-      res.status(200).json(qrCodes);
+      const response = { qrCodes, amount };
+
+      res.status(200).json(response);
     } else {
       res.status(404).json({ error: "Merkle root index not found" });
     }
