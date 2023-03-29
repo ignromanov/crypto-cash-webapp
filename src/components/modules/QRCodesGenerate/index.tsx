@@ -36,7 +36,7 @@ const QRCodesGenerate = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
+    <Card>
       <h2 className="text-xl font-semibold mb-4">Generate Secret Codes</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -71,7 +71,7 @@ const QRCodesGenerate = () => {
         </button>
         <ApiStatusDisplay apiStatus={apiStatus} />
       </form>
-    </div>
+    </Card>
   );
 };
 

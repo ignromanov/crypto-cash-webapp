@@ -1,11 +1,10 @@
-// components/Sidebar.tsx
 import React from "react";
 import Link from "next/link";
 
 const links = [
+  { href: "/balances", label: "Balances" },
   { href: "/generate-codes", label: "Code Generation" },
   { href: "/qr-code-redemption", label: "Code Redemption" },
-  { href: "/transactions", label: "Balance & Transactions" },
 ];
 
 const Sidebar: React.FC = () => {
