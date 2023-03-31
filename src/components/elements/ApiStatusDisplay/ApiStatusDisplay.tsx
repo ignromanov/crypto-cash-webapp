@@ -1,9 +1,5 @@
 import React from "react";
-import { ApiStatus } from "../../../hooks/useApiStatus";
-
-interface ApiStatusDisplayProps {
-  apiStatus: ApiStatus;
-}
+import { ApiStatusDisplayProps } from "./ApiStatusDisplay.types";
 
 const ApiStatusDisplay: React.FC<ApiStatusDisplayProps> = ({ apiStatus }) => {
   if (apiStatus.pending) {
@@ -29,4 +25,4 @@ const ApiStatusDisplay: React.FC<ApiStatusDisplayProps> = ({ apiStatus }) => {
   return null;
 };
 
-export default ApiStatusDisplay;
+export { ApiStatusDisplay };

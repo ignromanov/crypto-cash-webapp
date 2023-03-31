@@ -1,12 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface ICodesTree extends Document {
-  merkleRoot: string;
-  merkleRootIndex: number;
-  amount: number;
-  merkleLeaves: string[];
-  secretCodes: string[];
-}
+import mongoose, { Schema } from "mongoose";
+import { ICodesTree } from "./CodesTreeModel.types";
 
 const CodesTreeSchema = new Schema({
   merkleRoot: {
@@ -19,15 +12,13 @@ const CodesTreeSchema = new Schema({
     default: -1,
   },
   amount: {
-    type: Number,
+    type: String,
     required: true,
   },
-  merkleLeaves: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
+  merkleDump: {
+    type: String,
+    required: true,
+  },
   secretCodes: [
     {
       type: String,
@@ -38,6 +29,8 @@ const CodesTreeSchema = new Schema({
 
 CodesTreeSchema.index({ merkleRootIndex: 1, secretCodes: 1 });
 
-export const CodesTree =
+const CodesTreeModel =
   mongoose.models.CodesTree ||
   mongoose.model<ICodesTree>("CodesTree", CodesTreeSchema);
+
+export default CodesTreeModel;

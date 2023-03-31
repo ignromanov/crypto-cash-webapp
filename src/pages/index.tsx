@@ -1,8 +1,3 @@
-
-export default function Home() {
-  return (
-    <>
-      
-    </>
-  )
-}
+export default () => {
+  return "Home page";
+};

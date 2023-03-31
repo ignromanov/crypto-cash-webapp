@@ -1,23 +1,17 @@
-import React, { FormEvent, useState } from "react";
+import React, { useState } from "react";
 import useApiStatus from "@/hooks/useApiStatus";
 import axios from "axios";
-import ApiStatusDisplay from "../../elements/ApiStatusDisplay";
+import { ApiStatusDisplay } from "@/components/elements/ApiStatusDisplay";
 import { useMetamask } from "@/hooks/useMetamask";
-import Card from "@/components/layouts/Card";
+import { Card } from "@/components/layouts/Card";
+import { getMessageToSign } from "@/utils/secretCodes";
+import { formatEther, parseEther } from "ethers";
 
-const QRCodesGenerate = () => {
-  const { provider, account } = useMetamask();
+const GenerateCodes: React.FC = () => {
+  const { provider } = useMetamask();
   const [numberOfCodes, setNumberOfCodes] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState<string>("");
   const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
-
-  function getMessageToSign(
-    amount: string,
-    numberOfCodes: string,
-    timestamp: number
-  ) {
-    return `Generate Codes Request\nAmount: ${amount}\nNumber of Codes: ${numberOfCodes}\nTimestamp: ${timestamp}`;
-  }
 
   async function signMessage(message: string) {
     if (!provider) {
@@ -28,13 +22,14 @@ const QRCodesGenerate = () => {
     return signature;
   }
 
-  async function sendRequest(amount: string, numberOfCodes: string) {
+  async function sendRequest(amount: BigInt, numberOfCodes: string) {
     const timestamp = Date.now();
     const messageToSign = getMessageToSign(amount, numberOfCodes, timestamp);
     const signature = await signMessage(messageToSign);
 
     const response = await axios.post("/api/generate-codes", {
-      amount,
+      // @ts-ignore
+      amount: formatEther(amount),
       numberOfCodes,
       signature,
       timestamp,
@@ -49,7 +44,7 @@ const QRCodesGenerate = () => {
     updateApiStatus({ ...apiStatus, pending: true });
 
     try {
-      const response = await sendRequest(amount, numberOfCodes);
+      const response = await sendRequest(parseEther(amount), numberOfCodes);
       if (response.status === 201) {
         updateApiStatus({
           pending: false,
@@ -82,7 +77,7 @@ const QRCodesGenerate = () => {
             id="numOfCodes"
             value={numberOfCodes}
             onChange={(e) => setNumberOfCodes(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2"
           />
         </div>
         <div className="mb-4">
@@ -92,18 +87,15 @@ const QRCodesGenerate = () => {
           <input
             type="number"
             id="amount"
-            value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2"
           />
         </div>
-        <button className="w-full px-4 py-2 text-white bg-blue-600 rounded-md">
-          Generate Secret Codes
-        </button>
+        <button className="w-full px-4 py-2">Generate Secret Codes</button>
         <ApiStatusDisplay apiStatus={apiStatus} />
       </form>
     </Card>
   );
 };
 
-export default QRCodesGenerate;
+export { GenerateCodes };

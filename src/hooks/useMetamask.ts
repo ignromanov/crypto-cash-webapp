@@ -4,6 +4,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 
 export const useMetamask = () => {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [account, setAccount] = useState<string>("");
 
   useEffect(() => {
@@ -24,6 +25,10 @@ export const useMetamask = () => {
           ethereumProvider as any
         );
         setProvider(browserProvider);
+
+        const signer = await browserProvider.getSigner();
+        setSigner(signer);
+
         // @ts-ignore
         const accounts = await ethereumProvider.request({
           method: "eth_accounts",
@@ -38,5 +43,5 @@ export const useMetamask = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { provider, account };
+  return { provider, signer, account };
 };

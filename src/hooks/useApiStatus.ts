@@ -1,10 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-
-export interface ApiStatus {
-  pending: boolean;
-  success: boolean | null;
-  message: string;
-}
+import { useCallback, useState } from "react";
+import { ApiStatus } from "./useApiStatus.types";
 
 const useApiStatus = (): [
   ApiStatus,

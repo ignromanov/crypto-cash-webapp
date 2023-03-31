@@ -1,15 +1,28 @@
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useApiStatus from "@/hooks/useApiStatus";
 import axios from "axios";
-import ApiStatusDisplay from "@/components/elements/ApiStatusDisplay";
-import Card from "@/components/layouts/Card";
+import { ApiStatusDisplay } from "@/components/elements/ApiStatusDisplay";
+import { Card } from "@/components/layouts/Card";
+import { generateQrCodeImage } from "@/utils/qrCode";
 
-const QrCodesDisplay = () => {
+const DisplayQRCodes: React.FC = () => {
   const [merkleRootIndex, setMerkleRootIndex] = useState("");
   const [includeProof, setIncludeProof] = useState(false);
-  const [qrCodes, setQrCodes] = useState<string[]>([]);
+  const [qrCodesData, setQrCodesData] = useState<string[]>([]);
+  const [qrCodesImages, setQrCodesImages] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
   const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
+
+  useEffect(() => {
+    async function generateQRCodeImages() {
+      const images = await Promise.all(qrCodesData.map(generateQrCodeImage));
+      setQrCodesImages(images);
+    }
+
+    if (qrCodesData.length > 0) {
+      generateQRCodeImages();
+    }
+  }, [qrCodesData]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -22,7 +35,7 @@ const QrCodesDisplay = () => {
       });
 
       if (response.status === 200) {
-        setQrCodes(response.data.qrCodes);
+        setQrCodesData(response.data.qrCodesData);
         setAmount(response.data.amount);
 
         updateApiStatus({
@@ -40,10 +53,10 @@ const QrCodesDisplay = () => {
     }
   };
 
-  const handleQrCodeClick = async (qrCode: string) => {
+  const handleQrCodeClick = async (qrCodeData: string) => {
     try {
-      await navigator.clipboard.writeText(qrCode);
-      alert("QR code copied to clipboard");
+      await navigator.clipboard.writeText(qrCodeData);
+      alert("QR code data copied to clipboard");
     } catch (error) {
       alert("Failed to copy QR code to clipboard");
     }
@@ -65,7 +78,7 @@ const QrCodesDisplay = () => {
             id="merkleRootIndex"
             value={merkleRootIndex}
             onChange={(e) => setMerkleRootIndex(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2"
           />
         </div>
         <div className="mb-4 flex items-center">
@@ -80,25 +93,23 @@ const QrCodesDisplay = () => {
             Include Merkle Proof
           </label>
         </div>
-        <button className="w-full px-4 py-2 text-white bg-blue-600 rounded-md">
-          Fetch QR Codes
-        </button>
+        <button className="w-full px-4 py-2">Fetch QR Codes</button>
         <ApiStatusDisplay apiStatus={apiStatus} />
       </form>
-      {qrCodes.length > 0 && (
+      {qrCodesData.length > 0 && (
         <p className="mt-4">
           Amount: <strong>{amount}</strong>
         </p>
       )}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {qrCodes.map((qrCode, index) => (
+        {qrCodesImages.map((qrCodeImage, index) => (
           <div
             key={index}
             className="bg-gray-100 p-4 rounded-lg hover:cursor-pointer"
-            onClick={() => handleQrCodeClick(qrCode)}
+            onClick={() => handleQrCodeClick(qrCodesData[index])}
           >
             <img
-              src={qrCode}
+              src={qrCodeImage}
               alt={`QR Code ${index + 1}`}
               className="w-full h-auto"
             />
@@ -109,4 +120,4 @@ const QrCodesDisplay = () => {
   );
 };
 
-export default QrCodesDisplay;
+export { DisplayQRCodes };

@@ -1,13 +1,11 @@
-import QrCodesDisplay from "@/components/modules/QRCodesDisplay";
-import QRCodesGenerate from "@/components/modules/QRCodesGenerate";
+import { DisplayQRCodes } from "@/components/modules/DisplayQRCodes";
+import { GenerateCodes } from "@/components/modules/GenerateCodes";
 
-const QrCodeGenerationPage = () => {
+export default () => {
   return (
     <>
-      <QRCodesGenerate />
-      <QrCodesDisplay />
+      <GenerateCodes />
+      <DisplayQRCodes />
     </>
   );
 };
-
-export default QrCodeGenerationPage;

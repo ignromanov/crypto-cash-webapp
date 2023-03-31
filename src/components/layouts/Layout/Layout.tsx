@@ -1,12 +1,7 @@
-import { useMetamask } from "@/hooks/useMetamask";
 import React from "react";
-import Header from "../Header";
-import Sidebar from "../Sidebar";
-
-type Props = {
-  projectName: string;
-  children: React.ReactNode;
-};
+import { Header } from "@/components/layouts/Header";
+import { Sidebar } from "@/components/layouts/Sidebar";
+import { Props } from "./Layout.types";
 
 const Layout: React.FC<Props> = ({ projectName, children }) => {
   return (
@@ -22,4 +17,4 @@ const Layout: React.FC<Props> = ({ projectName, children }) => {
   );
 };
 
-export default Layout;
+export { Layout };

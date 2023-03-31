@@ -1,0 +1,1 @@
+export { DisplayQRCodes } from "./QrCodesDisplay";

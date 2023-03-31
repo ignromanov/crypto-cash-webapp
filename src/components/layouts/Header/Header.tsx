@@ -1,10 +1,7 @@
 import { useMetamask } from "@/hooks/useMetamask";
 import Link from "next/link";
 import React from "react";
-
-type Props = {
-  projectName: string;
-};
+import { Props } from "./Header.types";
 
 const Header: React.FC<Props> = ({ projectName }) => {
   const { account } = useMetamask();
@@ -28,4 +25,4 @@ const Header: React.FC<Props> = ({ projectName }) => {
   );
 };
 
-export default Header;
+export { Header };

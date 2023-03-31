@@ -1,11 +1,6 @@
 import React from "react";
 import Link from "next/link";
-
-const links = [
-  { href: "/balances", label: "Balances" },
-  { href: "/generate-codes", label: "Code Generation" },
-  { href: "/redeem-code", label: "Code Redemption" },
-];
+import { links } from "./Sidebar.constants";
 
 const Sidebar: React.FC = () => {
   return (
@@ -27,5 +22,4 @@ const Sidebar: React.FC = () => {
     </aside>
   );
 };
-
-export default Sidebar;
+export { Sidebar };
