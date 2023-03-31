@@ -1,193 +1,61 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/layouts/Card";
-import { generateQrCodeImage } from "@/utils/qrCode";
-import { useMetamask } from "@/hooks/useMetamask";
-import axios from "axios";
-import { ethers, keccak256 } from "ethers";
-import {
-  codesFactoryContractAbi,
-  codesFactoryContractAddress,
-  CodesFactoryContractType,
-} from "@/contracts/codesFactory";
-import useApiStatus from "@/hooks/useApiStatus";
-import { ApiStatusDisplay } from "@/components/elements/ApiStatusDisplay";
-import { calculateHash, generateRandomNonce } from "@/utils/secretCodes";
-import { parseBigIntValue } from "@/utils/revealBigInt";
+import useMetamask from "@/hooks/useMetamask";
+import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { DataToRedeem } from "./RedeemCode.types";
+import { generateQrCodeImage } from "@/utils/qrCode";
+import { parseBigIntValue } from "@/utils/revealBigInt";
+import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
+import useExecStatus from "@/hooks/useExecStatus";
 
 const RedeemCode: React.FC = () => {
-  const { provider, signer } = useMetamask();
-  const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
-  const codesFactoryContractRef = useRef<CodesFactoryContractType | null>(null);
-
   const [dataToRedeem, setDataToRedeem] = useState<DataToRedeem | null>(null);
-  const [qrCodeImage, setQrCodeImage] = useState("");
+  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [isCommitted, setIsCommitted] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
-  useEffect(() => {
-    codesFactoryContractRef.current = new ethers.BaseContract(
-      codesFactoryContractAddress,
-      codesFactoryContractAbi,
-      signer
-    ) as unknown as CodesFactoryContractType;
-  }, [signer]);
+  const { handleCommit, handleReveal } = useCodesFactoryContract(
+    dataToRedeem,
+    updateExecStatus
+  );
 
-  const handleQrCodeTextChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const data = event.target.value;
-    try {
-      const qrCodeImage = await generateQrCodeImage(data);
-      setQrCodeImage(qrCodeImage);
+  const handleCommitWrapper = useCallback(async () => {
+    clearExecStatus();
+    const success = await handleCommit();
+    setIsCommitted(success);
+  }, [handleCommit]);
 
-      const parsedData: DataToRedeem = JSON.parse(data, parseBigIntValue);
-      // parsedData.secretCodeBytes = decodeBase64(parsedData.secretCode);
-      setDataToRedeem(parsedData);
+  const handleRevealWrapper = useCallback(async () => {
+    clearExecStatus();
+    const success = await handleReveal();
+    setIsRevealed(success);
+  }, [handleReveal]);
 
-      setIsCommitted(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleCommit = useCallback(async () => {
-    if (!dataToRedeem) {
-      return;
-    }
-
-    try {
-      const { secretCode } = dataToRedeem;
-
-      const nonce = generateRandomNonce();
-      const commitment = calculateHash(secretCode, nonce);
-
-      const storageKey = `commitment_nonce_${keccak256(secretCode)}`;
-      localStorage.setItem(storageKey, nonce.toString());
-
-      clearApiStatus();
-      updateApiStatus({
-        ...apiStatus,
-        pending: true,
-        message: "Sending commit transaction...",
-      });
-
-      const commitTx = await codesFactoryContractRef.current!.commitCode(
-        commitment
-      );
-
-      updateApiStatus({
-        ...apiStatus,
-        message: "Waiting for transaction confirmation...",
-      });
-
-      // Wait for the transaction to be confirmed
-      await commitTx.wait();
-
-      setIsCommitted(true);
-      updateApiStatus({
-        pending: false,
-        success: true,
-        message: "QR code commited successfully!",
-      });
-    } catch (error) {
-      console.error(error);
-      updateApiStatus({
-        pending: false,
-        success: false,
-        message: "Error commiting code!",
-      });
-    }
-  }, [dataToRedeem]);
-
-  const handleReveal = useCallback(async () => {
-    if (!dataToRedeem) {
-      return;
-    }
-
-    try {
-      clearApiStatus();
-      updateApiStatus({
-        ...apiStatus,
-        pending: true,
-        message: "Fetching Merkle proof...",
-      });
-
-      let {
-        // secretCodeBytes,
-        secretCode,
-        merkleProof,
-        merkleRootIndex,
-        amount,
-      } = dataToRedeem;
-
-      const nonceStorageKey = `commitment_nonce_${keccak256(secretCode)}`;
-      const storedNonce = localStorage.getItem(nonceStorageKey);
-      if (!storedNonce) {
-        updateApiStatus({
-          pending: false,
-          success: false,
-          message: "Nonce not found. Please commit the code first.",
-        });
-        return;
+  const handleQrCodeTextChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const data = event.target.value;
+      if (!data) {
+        setQrCodeImage(null);
+        setDataToRedeem(null);
+        setIsCommitted(false);
+        setIsRevealed(false);
       }
+      try {
+        const qrCodeImage = await generateQrCodeImage(data);
+        setQrCodeImage(qrCodeImage);
 
-      // Request Merkle proof from the server if not provided
-      if (!merkleProof) {
-        const response = await axios.get("/api/get-merkle-proof", {
-          params: { secretCode, merkleRootIndex },
-        });
+        const parsedData: DataToRedeem = JSON.parse(data, parseBigIntValue);
+        setDataToRedeem(parsedData);
 
-        if (response.status === 200) {
-          merkleProof = response.data.merkleProof;
-        } else {
-          updateApiStatus({
-            pending: false,
-            success: false,
-            message: "Error fetching Merkle proof",
-          });
-          return;
-        }
+        setIsCommitted(false);
+        setIsRevealed(false);
+      } catch (error) {
+        console.error(error);
       }
-
-      updateApiStatus({
-        ...apiStatus,
-        message: "Sending redeem transaction...",
-      });
-
-      // Call the redeemCode function on the contract
-      const redeemTx = await codesFactoryContractRef.current!.revealCode(
-        merkleRootIndex,
-        secretCode,
-        // @ts-ignore
-        amount,
-        BigInt(storedNonce),
-        merkleProof
-      );
-
-      updateApiStatus({
-        ...apiStatus,
-        message: "Waiting for transaction confirmation...",
-      });
-
-      // Wait for the transaction to be confirmed
-      await redeemTx.wait();
-
-      localStorage.removeItem(nonceStorageKey);
-
-      updateApiStatus({
-        pending: false,
-        success: true,
-        message: "QR code revealed successfully!",
-      });
-    } catch (error) {
-      console.error(error);
-      updateApiStatus({
-        pending: false,
-        success: false,
-        message: "Error redeeming QR code!",
-      });
-    }
-  }, [dataToRedeem]);
+    },
+    []
+  );
 
   return (
     <Card>
@@ -216,26 +84,29 @@ const RedeemCode: React.FC = () => {
           </div>
         )}
       </div>
+
       <button
-        className={`w-full px-4 py-2 ${
+        className={`${
           !dataToRedeem || isCommitted ? "opacity-50 cursor-not-allowed" : ""
         }`}
-        onClick={handleCommit}
+        onClick={handleCommitWrapper}
         disabled={!dataToRedeem || isCommitted}
       >
         Commit Code
       </button>
       <button
-        className={`w-full px-4 py-2 mt-4 rounded-md ${
-          !isCommitted ? "opacity-50 cursor-not-allowed" : ""
+        className={`mt-4 ${
+          !isCommitted || isRevealed ? "opacity-50 cursor-not-allowed" : ""
         }`}
-        onClick={handleReveal}
-        disabled={!isCommitted}
+        onClick={handleRevealWrapper}
+        disabled={!isCommitted || isRevealed}
       >
         Reveal Code
       </button>
-      <ApiStatusDisplay apiStatus={apiStatus} />
+
+      <ExecStatusDisplay execStatus={execStatus} />
     </Card>
   );
 };
+
 export { RedeemCode };
