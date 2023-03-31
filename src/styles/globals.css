@@ -16,5 +16,5 @@ input[type="text"] {
 }
 
 button {
-  @apply rounded-md bg-cryptocash-primary text-gray-900;
+  @apply w-full px-4 py-2 rounded-md bg-cryptocash-primary text-gray-900;
 }

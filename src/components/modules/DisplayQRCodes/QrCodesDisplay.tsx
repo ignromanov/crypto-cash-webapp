@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import useApiStatus from "@/hooks/useApiStatus";
+import useExecStatus from "@/hooks/useExecStatus";
 import axios from "axios";
-import { ApiStatusDisplay } from "@/components/elements/ApiStatusDisplay";
+import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Card } from "@/components/layouts/Card";
 import { generateQrCodeImage } from "@/utils/qrCode";
 
@@ -11,7 +11,7 @@ const DisplayQRCodes: React.FC = () => {
   const [qrCodesData, setQrCodesData] = useState<string[]>([]);
   const [qrCodesImages, setQrCodesImages] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
-  const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
+  const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
   useEffect(() => {
     async function generateQRCodeImages() {
@@ -26,8 +26,8 @@ const DisplayQRCodes: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearApiStatus();
-    updateApiStatus({ ...apiStatus, pending: true });
+    clearExecStatus();
+    updateExecStatus({ pending: true, message: "Fetching QR codes..." });
 
     try {
       const response = await axios.get("/api/get-qr-codes", {
@@ -38,14 +38,14 @@ const DisplayQRCodes: React.FC = () => {
         setQrCodesData(response.data.qrCodesData);
         setAmount(response.data.amount);
 
-        updateApiStatus({
+        updateExecStatus({
           pending: false,
           success: true,
           message: "QR codes fetched successfully!",
         });
       }
     } catch (error) {
-      updateApiStatus({
+      updateExecStatus({
         pending: false,
         success: false,
         message: "Error fetching QR codes!",
@@ -56,9 +56,17 @@ const DisplayQRCodes: React.FC = () => {
   const handleQrCodeClick = async (qrCodeData: string) => {
     try {
       await navigator.clipboard.writeText(qrCodeData);
-      alert("QR code data copied to clipboard");
+      updateExecStatus({
+        pending: false,
+        success: true,
+        message: "QR code data copied to clipboard",
+      });
     } catch (error) {
-      alert("Failed to copy QR code to clipboard");
+      updateExecStatus({
+        pending: false,
+        success: false,
+        message: "Failed to copy QR code to clipboard",
+      });
     }
   };
 
@@ -93,14 +101,17 @@ const DisplayQRCodes: React.FC = () => {
             Include Merkle Proof
           </label>
         </div>
-        <button className="w-full px-4 py-2">Fetch QR Codes</button>
-        <ApiStatusDisplay apiStatus={apiStatus} />
+
+        <button>Fetch QR Codes</button>
+        <ExecStatusDisplay execStatus={execStatus} />
       </form>
+
       {qrCodesData.length > 0 && (
         <p className="mt-4">
           Amount: <strong>{amount}</strong>
         </p>
       )}
+
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {qrCodesImages.map((qrCodeImage, index) => (
           <div

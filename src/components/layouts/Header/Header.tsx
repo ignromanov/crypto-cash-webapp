@@ -1,4 +1,4 @@
-import { useMetamask } from "@/hooks/useMetamask";
+import useMetamask from "@/hooks/useMetamask";
 import Link from "next/link";
 import React from "react";
 import { Props } from "./Header.types";

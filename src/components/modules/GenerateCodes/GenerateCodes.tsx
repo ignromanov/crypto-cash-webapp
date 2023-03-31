@@ -1,28 +1,28 @@
 import React, { useState } from "react";
-import useApiStatus from "@/hooks/useApiStatus";
+import useExecStatus from "@/hooks/useExecStatus";
 import axios from "axios";
-import { ApiStatusDisplay } from "@/components/elements/ApiStatusDisplay";
-import { useMetamask } from "@/hooks/useMetamask";
+import useMetamask from "@/hooks/useMetamask";
 import { Card } from "@/components/layouts/Card";
 import { getMessageToSign } from "@/utils/secretCodes";
 import { formatEther, parseEther } from "ethers";
+import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 
 const GenerateCodes: React.FC = () => {
   const { provider } = useMetamask();
   const [numberOfCodes, setNumberOfCodes] = useState("");
   const [amount, setAmount] = useState<string>("");
-  const [apiStatus, updateApiStatus, clearApiStatus] = useApiStatus();
+  const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
-  async function signMessage(message: string) {
+  const signMessage = async (message: string) => {
     if (!provider) {
       return "";
     }
     const signer = await provider.getSigner();
     const signature = await signer.signMessage(message);
     return signature;
-  }
+  };
 
-  async function sendRequest(amount: BigInt, numberOfCodes: string) {
+  const sendRequest = async (amount: BigInt, numberOfCodes: string) => {
     const timestamp = Date.now();
     const messageToSign = getMessageToSign(amount, numberOfCodes, timestamp);
     const signature = await signMessage(messageToSign);
@@ -36,24 +36,27 @@ const GenerateCodes: React.FC = () => {
     });
 
     return response;
-  }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearApiStatus();
-    updateApiStatus({ ...apiStatus, pending: true });
+    clearExecStatus();
+    updateExecStatus({
+      pending: true,
+      message: "Generating secret codes...",
+    });
 
     try {
       const response = await sendRequest(parseEther(amount), numberOfCodes);
       if (response.status === 201) {
-        updateApiStatus({
+        updateExecStatus({
           pending: false,
           success: true,
           message: `Secret codes generated successfully with RootIndex: ${response.data.merkleRootIndex}!`,
         });
       }
     } catch (error) {
-      updateApiStatus({
+      updateExecStatus({
         pending: false,
         success: false,
         message: "Error generating secret codes!",
@@ -82,7 +85,7 @@ const GenerateCodes: React.FC = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="amount" className="block text-sm font-medium mb-2">
-            Amount per Code
+            Amount of tokens per Code
           </label>
           <input
             type="number"
@@ -91,8 +94,9 @@ const GenerateCodes: React.FC = () => {
             className="w-full p-2"
           />
         </div>
-        <button className="w-full px-4 py-2">Generate Secret Codes</button>
-        <ApiStatusDisplay apiStatus={apiStatus} />
+
+        <button>Generate Secret Codes</button>
+        <ExecStatusDisplay execStatus={execStatus} />
       </form>
     </Card>
   );

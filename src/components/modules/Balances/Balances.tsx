@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ethers, formatEther } from "ethers";
-import { useMetamask } from "@/hooks/useMetamask";
+import useMetamask from "@/hooks/useMetamask";
 import {
   codesFactoryContractAbi,
   codesFactoryContractAddress,

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import detectEthereumProvider from "@metamask/detect-provider";
 
-export const useMetamask = () => {
+const useMetamask = () => {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [account, setAccount] = useState<string>("");
@@ -45,3 +45,5 @@ export const useMetamask = () => {
 
   return { provider, signer, account };
 };
+
+export default useMetamask;
