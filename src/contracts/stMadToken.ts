@@ -1,4 +1,3 @@
-import { ethers, JsonRpcProvider } from "ethers";
 import { StMadToken } from "../../../backend/types/contracts/StMadToken";
 import StMadTokenJsonArtifact from "../../../backend/artifacts/contracts/stMadToken.sol/stMadToken.json";
 
