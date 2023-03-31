@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+input:focus {
+  @apply outline-cryptocash-primary;
+}
+
+input[type="checkbox"]:checked {
+  @apply accent-cryptocash-primary;
+}
+
+input[type="number"],
+input[type="text"] {
+  @apply border rounded border-gray-300;
+}
+
+button {
+  @apply rounded-md bg-cryptocash-primary text-gray-900;
+}

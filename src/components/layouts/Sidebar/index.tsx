@@ -4,7 +4,7 @@ import Link from "next/link";
 const links = [
   { href: "/balances", label: "Balances" },
   { href: "/generate-codes", label: "Code Generation" },
-  { href: "/qr-code-redemption", label: "Code Redemption" },
+  { href: "/redeem-code", label: "Code Redemption" },
 ];
 
 const Sidebar: React.FC = () => {
@@ -16,7 +16,7 @@ const Sidebar: React.FC = () => {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-cryptocash-secondary rounded-md"
               >
                 {link.label}
               </Link>

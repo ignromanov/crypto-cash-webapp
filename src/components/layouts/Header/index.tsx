@@ -14,13 +14,10 @@ const Header: React.FC<Props> = ({ projectName }) => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <img src="/logo.png" alt="CryptoCash Logo" className="h-10 mr-2" />
-          <span className="text-xl font-semibold text-cryptocash-primary">
-            CryptoCash
-          </span>
         </Link>
         <div className="text-lg font-medium">
           <span className="text-sm mr-2">Connected account:</span>
-          <span className="text-xs bg-gray-200 rounded-md px-2 py-1">
+          <span className="text-xs bg-cryptocash-secondary rounded-md px-2 py-1 text-cryptocash-tetriary">
             {account
               ? `${account.slice(0, 6)}...${account.slice(-4)}`
               : "Not Connected"}
