@@ -7,12 +7,14 @@ import { generateQrCodeImage } from "@/utils/qrCode";
 import { parseBigIntValue } from "@/utils/revealBigInt";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
+import { formatEther, parseEther } from "ethers";
+import { Badge } from "@/components/elements/Badge";
 
 const RedeemCode: React.FC = () => {
   const [dataToRedeem, setDataToRedeem] = useState<DataToRedeem | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
-  const [isCommitted, setIsCommitted] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [isCodeCommitted, setIsCodeCommitted] = useState(false);
+  const [isCodeRevealed, setIsCodeRevealed] = useState(false);
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
   const { handleCommit, handleReveal } = useCodesFactoryContract(
@@ -23,13 +25,13 @@ const RedeemCode: React.FC = () => {
   const handleCommitWrapper = useCallback(async () => {
     clearExecStatus();
     const success = await handleCommit();
-    setIsCommitted(success);
+    setIsCodeCommitted(success);
   }, [handleCommit]);
 
   const handleRevealWrapper = useCallback(async () => {
     clearExecStatus();
     const success = await handleReveal();
-    setIsRevealed(success);
+    setIsCodeRevealed(success);
   }, [handleReveal]);
 
   const handleQrCodeTextChange = useCallback(
@@ -38,8 +40,8 @@ const RedeemCode: React.FC = () => {
       if (!data) {
         setQrCodeImage(null);
         setDataToRedeem(null);
-        setIsCommitted(false);
-        setIsRevealed(false);
+        setIsCodeCommitted(false);
+        setIsCodeRevealed(false);
       }
       try {
         const qrCodeImage = await generateQrCodeImage(data);
@@ -48,8 +50,8 @@ const RedeemCode: React.FC = () => {
         const parsedData: DataToRedeem = JSON.parse(data, parseBigIntValue);
         setDataToRedeem(parsedData);
 
-        setIsCommitted(false);
-        setIsRevealed(false);
+        setIsCodeCommitted(false);
+        setIsCodeRevealed(false);
       } catch (error) {
         console.error(error);
       }
@@ -84,22 +86,42 @@ const RedeemCode: React.FC = () => {
           </div>
         )}
       </div>
+      {dataToRedeem && (
+        <div className="mb-4 flex items-center justify-center space-x-4 ">
+          <Badge
+            caption={`Amount: ${formatEther(dataToRedeem.amount)}`}
+            status={null}
+          />
+          <Badge
+            caption={isCodeCommitted ? "Committed" : "Not Committed"}
+            status={isCodeCommitted}
+          />
+          <Badge
+            caption={isCodeRevealed ? "Redeemed" : "Not Redeemed"}
+            status={isCodeRevealed}
+          />
+        </div>
+      )}
 
       <button
         className={`${
-          !dataToRedeem || isCommitted ? "opacity-50 cursor-not-allowed" : ""
+          !dataToRedeem || isCodeCommitted
+            ? "opacity-50 cursor-not-allowed"
+            : ""
         }`}
         onClick={handleCommitWrapper}
-        disabled={!dataToRedeem || isCommitted}
+        disabled={!dataToRedeem || isCodeCommitted}
       >
         Commit Code
       </button>
       <button
         className={`mt-4 ${
-          !isCommitted || isRevealed ? "opacity-50 cursor-not-allowed" : ""
+          !isCodeCommitted || isCodeRevealed
+            ? "opacity-50 cursor-not-allowed"
+            : ""
         }`}
         onClick={handleRevealWrapper}
-        disabled={!isCommitted || isRevealed}
+        disabled={!isCodeCommitted || isCodeRevealed}
       >
         Reveal Code
       </button>

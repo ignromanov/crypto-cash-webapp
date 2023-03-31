@@ -4,6 +4,7 @@ import axios from "axios";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Card } from "@/components/layouts/Card";
 import { generateQrCodeImage } from "@/utils/qrCode";
+import { Badge } from "@/components/elements/Badge";
 
 const DisplayQRCodes: React.FC = () => {
   const [merkleRootIndex, setMerkleRootIndex] = useState("");
@@ -26,7 +27,10 @@ const DisplayQRCodes: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setQrCodesData([]);
+    setQrCodesImages([]);
     clearExecStatus();
+
     updateExecStatus({ pending: true, message: "Fetching QR codes..." });
 
     try {
@@ -107,26 +111,37 @@ const DisplayQRCodes: React.FC = () => {
       </form>
 
       {qrCodesData.length > 0 && (
-        <p className="mt-4">
+        <p className="mt-6">
           Amount: <strong>{amount}</strong>
         </p>
       )}
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {qrCodesImages.map((qrCodeImage, index) => (
-          <div
-            key={index}
-            className="bg-gray-100 p-4 rounded-lg hover:cursor-pointer"
-            onClick={() => handleQrCodeClick(qrCodesData[index])}
-          >
-            <img
-              src={qrCodeImage}
-              alt={`QR Code ${index + 1}`}
-              className="w-full h-auto"
-            />
-          </div>
-        ))}
-      </div>
+      {qrCodesImages.length > 0 && (
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {qrCodesImages.map((qrCodeImage, index) => (
+            <div
+              key={index}
+              className="bg-gray-100 p-4 rounded-lg hover:cursor-pointer"
+              onClick={() => handleQrCodeClick(qrCodesData[index])}
+            >
+              <div className="relative">
+                <img
+                  src={qrCodeImage}
+                  alt={`QR Code ${index + 1}`}
+                  className="w-full h-auto"
+                />
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <Badge
+                    caption={false ? "Redeemed" : "Not Redeemed"}
+                    status={false}
+                    textSize="text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 };
