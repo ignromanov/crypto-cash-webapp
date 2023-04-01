@@ -48,18 +48,20 @@ const GenerateCodes: React.FC = () => {
 
     try {
       const response = await sendRequest(parseEther(amount), numberOfCodes);
-      if (response.status === 201) {
-        updateExecStatus({
-          pending: false,
-          success: true,
-          message: `Secret codes generated successfully with RootIndex: ${response.data.merkleRootIndex}!`,
-        });
+      if (response.status !== 201) {
+        throw Error(response.data.error);
       }
+
+      updateExecStatus({
+        pending: false,
+        success: true,
+        message: `Secret codes generated successfully with RootIndex: ${response.data.merkleRootIndex}!`,
+      });
     } catch (error) {
       updateExecStatus({
         pending: false,
         success: false,
-        message: "Error generating secret codes!",
+        message: `Error generating secret codes! ${error}`,
       });
     }
   };

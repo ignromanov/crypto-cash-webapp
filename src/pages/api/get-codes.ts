@@ -3,10 +3,15 @@ import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
 import connectToDatabase from "@/utils/mongoose";
 import { loadMerkleTree } from "@/utils/merkleTree";
-import { decodeBase64, formatEther, parseEther } from "ethers";
-import { stringifyBigIntValue } from "@/utils/revealBigInt";
+import { formatEther, parseEther } from "ethers";
+import { CodeData, Keccak256Hash } from "@/types/codes";
+import { ApiGetCodesResponseData } from "@/components/modules/DisplayCodes";
+import { stringifyCodeData } from "@/utils/convertCodeData";
 
-async function getQrCodes(req: NextApiRequest, res: NextApiResponse) {
+async function getCodes(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiGetCodesResponseData>
+) {
   const { merkleRootIndex, includeProof } = req.query;
   const withProof = includeProof === "true";
 
@@ -27,26 +32,33 @@ async function getQrCodes(req: NextApiRequest, res: NextApiResponse) {
     const merkleTree = loadMerkleTree(codesTree.merkleDump);
     const amount = parseEther(codesTree.amount);
 
-    const qrCodesData = await Promise.all(
+    const codesData = await Promise.all(
       codesTree.secretCodes.map(async (secretCode, index) => {
-        const leafHash = merkleTree.leafHash([secretCode, amount]);
-        const qrCodeData: any = {
-          merkleRootIndex,
+        const leafHash = merkleTree.leafHash([
           secretCode,
           amount,
+        ]) as Keccak256Hash;
+        const codeData: CodeData = {
+          secretCode,
+          amount,
+          merkleRootIndex,
           leafHash,
         };
 
         if (withProof) {
-          const merkleProof = merkleTree.getProof(index);
-          qrCodeData["merkleProof"] = merkleProof;
+          const merkleProof = merkleTree.getProof(index) as Keccak256Hash[];
+          codeData["merkleProof"] = merkleProof;
         }
 
-        return JSON.stringify(qrCodeData, stringifyBigIntValue);
+        return stringifyCodeData(codeData);
       })
     );
 
-    const response = { qrCodesData, amount: formatEther(amount) };
+    const response = {
+      status: "success" as const,
+      codesData,
+      amount: formatEther(amount),
+    };
 
     res.status(200).json(response);
   } else {
@@ -54,4 +66,4 @@ async function getQrCodes(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default getQrCodes;
+export default getCodes;

@@ -1,3 +1,4 @@
+import { CodeData } from "@/types/codes";
 import { formatEther, parseEther } from "ethers";
 
 const stringifyBigIntValue = (_: string, value: any) =>
@@ -10,4 +11,14 @@ const parseBigIntValue = (key: string, value: any) => {
   return value;
 };
 
-export { stringifyBigIntValue, parseBigIntValue };
+const stringifyCodeData = (codeData: CodeData): string =>
+  JSON.stringify(codeData, stringifyBigIntValue);
+const parseCodeData = (codeDataStr: string): CodeData =>
+  JSON.parse(codeDataStr, parseBigIntValue);
+
+export {
+  stringifyCodeData,
+  parseCodeData,
+  stringifyBigIntValue,
+  parseBigIntValue,
+};

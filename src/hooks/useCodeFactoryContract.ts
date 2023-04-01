@@ -1,29 +1,34 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ethers, keccak256 } from "ethers";
+import { useCallback, useEffect, useState } from "react";
+import { ethers } from "ethers";
 import {
   codesFactoryContractAbi,
   codesFactoryContractAddress,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
 import useMetamask from "./useMetamask";
-import { DataToRedeem } from "@/components/modules/RedeemCodes";
 import { generateRandomNonce, calculateHash } from "@/utils/secretCodes";
 import axios from "axios";
 import { ExecStatus } from "./useExecStatus.types";
+import { CodeData, Keccak256Hash } from "@/types/codes";
 
 const useCodesFactoryContract = (
-  dataToRedeem: DataToRedeem | null,
   updateExecStatus: (status: Partial<ExecStatus>) => void
 ) => {
-  const { signer } = useMetamask();
-  const codesFactoryContractRef = useRef<CodesFactoryContractType | null>(null);
+  const { signer, account } = useMetamask();
+  const [codesFactoryContract, setCodesFactoryContract] =
+    useState<CodesFactoryContractType | null>(null);
 
   useEffect(() => {
-    codesFactoryContractRef.current = new ethers.BaseContract(
+    if (!signer) {
+      return;
+    }
+
+    const codesFactoryContract = new ethers.BaseContract(
       codesFactoryContractAddress,
       codesFactoryContractAbi,
       signer
     ) as unknown as CodesFactoryContractType;
+    setCodesFactoryContract(codesFactoryContract);
   }, [signer]);
 
   const requestMerkleProof = useCallback(
@@ -41,115 +46,166 @@ const useCodesFactoryContract = (
     []
   );
 
-  const handleCommit = useCallback(async (): Promise<boolean> => {
-    if (!dataToRedeem) {
-      return false;
-    }
-
-    updateExecStatus({
-      pending: true,
-      message: "Preparing data for a transaction...",
-    });
-
-    try {
-      const { secretCode } = dataToRedeem;
-
-      const nonce = generateRandomNonce();
-      const commitment = calculateHash(secretCode, nonce);
-      const storageKey = `commitment_nonce_${keccak256(secretCode)}`;
-      localStorage.setItem(storageKey, nonce.toString());
-
-      // send commit transaction
-      const commitTx = await codesFactoryContractRef.current!.commitCode(
-        commitment
-      );
-
-      // Wait for the transaction to be confirmed
-      updateExecStatus({
-        message: "Waiting for the transaction confirmation...",
-      });
-      await commitTx.wait();
-    } catch (error) {
-      console.error(error);
-      updateExecStatus({
-        pending: false,
-        success: false,
-        message: "Error commiting code!",
-      });
-      return false;
-    }
-
-    updateExecStatus({
-      pending: false,
-      success: true,
-      message: "The code commited successfully!",
-    });
-    return true;
-  }, [dataToRedeem, updateExecStatus]);
-
-  const handleReveal = useCallback(async (): Promise<boolean> => {
-    if (!dataToRedeem) {
-      return false;
-    }
-
-    updateExecStatus({
-      pending: true,
-      message: "Preparing data for a transaction...",
-    });
-
-    try {
-      let { secretCode, merkleProof, merkleRootIndex, amount } = dataToRedeem;
-
-      // get commitment nonce
-      const nonceStorageKey = `commitment_nonce_${keccak256(secretCode)}`;
-      const storedNonce = localStorage.getItem(nonceStorageKey);
-      if (!storedNonce) {
-        throw new Error("Nonce not found. Please commit the code first.");
+  const handleCommit = useCallback(
+    async (dataToRedeem: CodeData | null): Promise<boolean> => {
+      if (!dataToRedeem || !codesFactoryContract) {
+        return false;
       }
 
-      // request Merkle proof from the server if not provided
-      if (!merkleProof) {
-        merkleProof = await requestMerkleProof(secretCode, merkleRootIndex);
+      updateExecStatus({
+        pending: true,
+        message: "Preparing data for a transaction...",
+      });
+
+      try {
+        const { secretCode, amount } = dataToRedeem;
+
+        const nonce = generateRandomNonce();
+        const commitment = calculateHash(secretCode, nonce);
+        const storageKey = `commitment_nonce_${calculateHash(
+          secretCode,
+          amount
+        )}`;
+        localStorage.setItem(storageKey, nonce.toString());
+
+        // send commit transaction
+        const commitTx = await codesFactoryContract.commitCode(commitment);
+
+        // Wait for the transaction to be confirmed
+        updateExecStatus({
+          message: "Waiting for the transaction confirmation...",
+        });
+        await commitTx.wait();
+      } catch (error) {
+        console.error(error);
+        updateExecStatus({
+          pending: false,
+          success: false,
+          message: "Error commiting code!",
+        });
+        return false;
       }
 
-      // call the redeemCode function on the contract
-      const redeemTx = await codesFactoryContractRef.current!.revealCode(
-        merkleRootIndex,
-        secretCode,
-        // @ts-ignore
-        amount,
-        BigInt(storedNonce),
-        merkleProof
-      );
-
-      // Wait for the transaction to be confirmed
-      updateExecStatus({
-        message: "Waiting for the transaction confirmation...",
-      });
-      await redeemTx.wait();
-
-      localStorage.removeItem(nonceStorageKey);
-    } catch (error) {
-      console.error(error);
       updateExecStatus({
         pending: false,
-        success: false,
-        message: "Error redeeming code!",
+        success: true,
+        message: "The code commited successfully!",
       });
-      return false;
-    }
+      return true;
+    },
+    [codesFactoryContract, updateExecStatus]
+  );
 
-    updateExecStatus({
-      pending: false,
-      success: true,
-      message: "The code revealed successfully!",
-    });
-    return true;
-  }, [dataToRedeem, updateExecStatus]);
+  const handleReveal = useCallback(
+    async (dataToRedeem: CodeData | null): Promise<boolean> => {
+      if (!dataToRedeem || !codesFactoryContract) {
+        return false;
+      }
+
+      updateExecStatus({
+        pending: true,
+        message: "Preparing data for a transaction...",
+      });
+
+      try {
+        let { secretCode, merkleProof, merkleRootIndex, amount } = dataToRedeem;
+
+        // get commitment nonce
+        const nonceStorageKey = `commitment_nonce_${calculateHash(
+          secretCode,
+          amount
+        )}`;
+        const storedNonce = localStorage.getItem(nonceStorageKey);
+        if (!storedNonce) {
+          throw new Error("Nonce not found. Please commit the code first.");
+        }
+
+        // request Merkle proof from the server if not provided
+        if (!merkleProof) {
+          merkleProof = await requestMerkleProof(secretCode, merkleRootIndex);
+        }
+
+        // call the redeemCode function on the contract
+        const redeemTx = await codesFactoryContract.revealCode(
+          merkleRootIndex,
+          secretCode,
+          // @ts-ignore
+          amount,
+          BigInt(storedNonce),
+          merkleProof
+        );
+
+        // Wait for the transaction to be confirmed
+        updateExecStatus({
+          message: "Waiting for the transaction confirmation...",
+        });
+        await redeemTx.wait();
+
+        localStorage.removeItem(nonceStorageKey);
+      } catch (error) {
+        console.error(error);
+        updateExecStatus({
+          pending: false,
+          success: false,
+          message: "Error redeeming code!",
+        });
+        return false;
+      }
+
+      updateExecStatus({
+        pending: false,
+        success: true,
+        message: "The code revealed successfully!",
+      });
+      return true;
+    },
+    [codesFactoryContract, updateExecStatus]
+  );
+
+  const filterRedeemedLeaves = useCallback(
+    async (leaves: Keccak256Hash[]): Promise<Keccak256Hash[]> => {
+      if (!codesFactoryContract || !leaves.length) return [];
+
+      const redeemedLeaves = (await codesFactoryContract.getRedeemedLeaves(
+        leaves
+      )) as Keccak256Hash[];
+
+      return redeemedLeaves;
+    },
+    [codesFactoryContract]
+  );
+
+  const filterCommitedCodes = useCallback(
+    async (codesData: CodeData[]): Promise<CodeData[]> => {
+      if (!codesData.length || !codesFactoryContract || !account) return [];
+
+      const commitments = await codesFactoryContract.getUserCommitments(
+        account
+      );
+      if (!commitments.length) return [];
+
+      const commitedCodes = codesData.filter((code) => {
+        const nonceStorageKey = `commitment_nonce_${calculateHash(
+          code.secretCode,
+          code.amount
+        )}`;
+
+        const storedNonce = localStorage.getItem(nonceStorageKey);
+        if (!storedNonce) return false;
+
+        return commitments.includes(storedNonce);
+      });
+
+      return commitedCodes;
+    },
+    [codesFactoryContract, account]
+  );
 
   return {
     handleCommit,
     handleReveal,
+    filterRedeemedLeaves,
+    filterCommitedCodes,
   };
 };
 

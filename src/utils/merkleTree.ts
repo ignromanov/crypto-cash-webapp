@@ -1,6 +1,6 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { DataHexString } from "ethers/types/utils/data";
-import { parseBigIntValue } from "./revealBigInt";
+import { parseBigIntValue } from "./convertCodeData";
 
 function loadMerkleTree(merkleDump: string) {
   const merkleTree = StandardMerkleTree.load(

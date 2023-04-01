@@ -16,7 +16,7 @@ import {
   codesFactoryContractAbi,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
-import { stringifyBigIntValue } from "@/utils/revealBigInt";
+import { stringifyBigIntValue } from "@/utils/convertCodeData";
 
 async function verifySignature(message: string, signature: string) {
   const recoveredAddress = verifyMessage(message, signature);
@@ -100,7 +100,10 @@ async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
     const txReceipt = await addMerkleRootTx.wait();
 
     if (txReceipt.status !== 1) {
-      throw new Error("Failed to add Merkle root to the contract");
+      res
+        .status(500)
+        .json({ error: "Failed to add Merkle root to the contract" });
+      return;
     }
 
     // Get the Merkle tree index from the transaction event

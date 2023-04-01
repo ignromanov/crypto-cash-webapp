@@ -1,3 +1,4 @@
+import { Keccak256Hash } from "@/types/codes";
 import {
   AbiCoder,
   BytesLike,
@@ -34,11 +35,11 @@ function generateRandomNonce(): BigInt {
   return randomInt;
 }
 
-function calculateHash(code: BytesLike, number: BigInt): string {
+function calculateHash(code: BytesLike, number: BigInt): Keccak256Hash {
   const abiCoder = AbiCoder.defaultAbiCoder();
   const encoded = abiCoder.encode(["bytes32", "uint256"], [code, number]);
   const keccak256Encoded = keccak256(encoded);
-  return keccak256(concat([keccak256Encoded]));
+  return keccak256(concat([keccak256Encoded])) as Keccak256Hash;
 }
 
 export {

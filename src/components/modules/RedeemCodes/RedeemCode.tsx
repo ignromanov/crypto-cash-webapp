@@ -1,38 +1,39 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/layouts/Card";
-import useMetamask from "@/hooks/useMetamask";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
-import { DataToRedeem } from "./RedeemCode.types";
 import { generateQrCodeImage } from "@/utils/qrCode";
-import { parseBigIntValue } from "@/utils/revealBigInt";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
 import { formatEther, parseEther } from "ethers";
 import { Badge } from "@/components/elements/Badge";
+import { CodeData } from "@/types/codes";
+import { parseCodeData } from "@/utils/convertCodeData";
 
 const RedeemCode: React.FC = () => {
-  const [dataToRedeem, setDataToRedeem] = useState<DataToRedeem | null>(null);
+  const [dataToRedeem, setDataToRedeem] = useState<CodeData | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [isCodeCommitted, setIsCodeCommitted] = useState(false);
   const [isCodeRevealed, setIsCodeRevealed] = useState(false);
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
-  const { handleCommit, handleReveal } = useCodesFactoryContract(
-    dataToRedeem,
-    updateExecStatus
-  );
+  const {
+    handleCommit,
+    handleReveal,
+    filterRedeemedLeaves,
+    filterCommitedCodes,
+  } = useCodesFactoryContract(updateExecStatus);
 
   const handleCommitWrapper = useCallback(async () => {
     clearExecStatus();
-    const success = await handleCommit();
+    const success = await handleCommit(dataToRedeem);
     setIsCodeCommitted(success);
-  }, [handleCommit]);
+  }, [dataToRedeem, handleCommit]);
 
   const handleRevealWrapper = useCallback(async () => {
     clearExecStatus();
-    const success = await handleReveal();
+    const success = await handleReveal(dataToRedeem);
     setIsCodeRevealed(success);
-  }, [handleReveal]);
+  }, [dataToRedeem, handleReveal]);
 
   const handleQrCodeTextChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,16 +48,24 @@ const RedeemCode: React.FC = () => {
         const qrCodeImage = await generateQrCodeImage(data);
         setQrCodeImage(qrCodeImage);
 
-        const parsedData: DataToRedeem = JSON.parse(data, parseBigIntValue);
+        const parsedData = parseCodeData(data);
         setDataToRedeem(parsedData);
 
-        setIsCodeCommitted(false);
-        setIsCodeRevealed(false);
+        const redeemedLeaves = await filterRedeemedLeaves([
+          parsedData.leafHash,
+        ]);
+        const isCodeRedeemed = redeemedLeaves.length === 1;
+
+        const commitedCodes = await filterCommitedCodes([parsedData]);
+        const isCodeCommitted = commitedCodes.length === 1;
+
+        setIsCodeCommitted(isCodeRedeemed || isCodeCommitted);
+        setIsCodeRevealed(isCodeRedeemed);
       } catch (error) {
         console.error(error);
       }
     },
-    []
+    [filterRedeemedLeaves, filterCommitedCodes]
   );
 
   return (
@@ -78,7 +87,7 @@ const RedeemCode: React.FC = () => {
           <img
             src={qrCodeImage}
             alt={`QR Code`}
-            className="w-1/2 h-auto object-contain"
+            className="w-auto h-1/2 object-contain"
           />
         ) : (
           <div className="w-full h-64 bg-gray-200 rounded flex items-center justify-center">
@@ -89,6 +98,7 @@ const RedeemCode: React.FC = () => {
       {dataToRedeem && (
         <div className="mb-4 flex items-center justify-center space-x-4 ">
           <Badge
+            //@ts-ignore
             caption={`Amount: ${formatEther(dataToRedeem.amount)}`}
             status={null}
           />
