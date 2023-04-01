@@ -36,7 +36,7 @@ const RedeemCode: React.FC = () => {
   }, [dataToRedeem, handleReveal]);
 
   const handleQrCodeTextChange = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const data = event.target.value;
       if (!data) {
         setQrCodeImage(null);
@@ -75,8 +75,7 @@ const RedeemCode: React.FC = () => {
         <label htmlFor="qrCodeText" className="block text-sm font-medium mb-2">
           Enter QR Code
         </label>
-        <input
-          type="text"
+        <textarea
           id="qrCodeText"
           onChange={handleQrCodeTextChange}
           className="w-full p-2"

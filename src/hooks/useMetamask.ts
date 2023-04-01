@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { Eip1193Provider, ethers } from "ethers";
 import detectEthereumProvider from "@metamask/detect-provider";
 
 const useMetamask = () => {
@@ -22,7 +22,7 @@ const useMetamask = () => {
       });
       if (ethereumProvider) {
         const browserProvider = new ethers.BrowserProvider(
-          ethereumProvider as any
+          ethereumProvider as unknown as Eip1193Provider
         );
         setProvider(browserProvider);
 
