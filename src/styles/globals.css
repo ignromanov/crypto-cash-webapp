@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 input:focus,
-textarea {
+textarea,
+select {
   @apply outline-cryptocash-primary;
 }
 
@@ -13,7 +14,8 @@ input[type="checkbox"]:checked {
 
 input[type="number"],
 input[type="text"],
-textarea {
+textarea,
+select {
   @apply border rounded border-gray-300;
 }
 

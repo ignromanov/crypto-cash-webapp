@@ -201,11 +201,19 @@ const useCodesFactoryContract = (
     [codesFactoryContract, account]
   );
 
+  const fetchMerkleRoots = useCallback(async () => {
+    if (!codesFactoryContract) return [];
+
+    const merkleRoots = await codesFactoryContract.getMerkleRoots();
+    return merkleRoots;
+  }, [codesFactoryContract]);
+
   return {
     handleCommit,
     handleReveal,
     filterRedeemedLeaves,
     filterCommitedCodes,
+    fetchMerkleRoots,
   };
 };
 

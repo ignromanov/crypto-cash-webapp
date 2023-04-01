@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useExecStatus from "@/hooks/useExecStatus";
 import axios from "axios";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
@@ -21,9 +21,19 @@ const DisplayCodes: React.FC = () => {
   const [redeemedLeaves, setRedeemedLeaves] = useState<Keccak256Hash[]>([]);
   const [qrCodesImages, setQrCodesImages] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
+  const [merkleRoots, setMerkleRoots] = useState<string[]>([]);
 
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
-  const { filterRedeemedLeaves } = useCodesFactoryContract(updateExecStatus);
+  const { filterRedeemedLeaves, fetchMerkleRoots } =
+    useCodesFactoryContract(updateExecStatus);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const merkleRoots = await fetchMerkleRoots();
+      setMerkleRoots(merkleRoots);
+    };
+    fetch();
+  }, [fetchMerkleRoots]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -131,15 +141,18 @@ const DisplayCodes: React.FC = () => {
             htmlFor="merkleRootIndex"
             className="block text-sm font-medium mb-2"
           >
-            Merkle Root Index
+            Choose Merkle Tree
           </label>
-          <input
-            type="number"
+          <select
             id="merkleRootIndex"
             value={merkleRootIndex}
             onChange={(e) => setMerkleRootIndex(e.target.value)}
             className="w-full p-2"
-          />
+          >
+            {merkleRoots.map((rootCode, index) => (
+              <option value={index}>{`${index}) ${rootCode}`}</option>
+            ))}
+          </select>
         </div>
         <div className="mb-4 flex items-center">
           <input
@@ -160,12 +173,12 @@ const DisplayCodes: React.FC = () => {
 
       {codesData.length > 0 && (
         <p className="mt-6">
-          Amount: <strong>{amount}</strong>
+          <Badge caption={`Amount of Code: ${amount}`} status={null} />
         </p>
       )}
 
       {qrCodesImages.length > 0 && (
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {qrCodesImages.map(renderQrCodeImage)}
         </div>
       )}
