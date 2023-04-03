@@ -13,6 +13,11 @@ const Sidebar: React.FC = () => {
                 href={link.href}
                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-cryptocash-secondary rounded-md"
               >
+                <img
+                  src={link.icon}
+                  alt={`${link.label} icon`}
+                  className="inline-block mr-2"
+                />
                 {link.label}
               </Link>
             </li>
