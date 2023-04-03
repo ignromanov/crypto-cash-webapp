@@ -2,27 +2,23 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
 import { generateMerkleTree } from "@/utils/merkleTree";
-import { generateSecretCodes, getMessageToSign } from "@/utils/secretCodes";
-import connectToDatabase from "@/utils/mongoose";
 import {
-  ethers,
-  formatEther,
-  JsonRpcProvider,
-  parseEther,
-  verifyMessage,
-} from "ethers";
+  generateSecretCodes,
+  getMessageToSign,
+  verifySignature,
+} from "@/utils/secretCodes";
+import connectToDatabase from "@/utils/mongoose";
+import { ethers, JsonRpcProvider, parseEther } from "ethers";
 import {
   codesFactoryContractAddress,
   codesFactoryContractAbi,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
 import { stringifyBigIntValue } from "@/utils/convertCodeData";
-
-async function verifySignature(message: string, signature: string) {
-  const recoveredAddress = verifyMessage(message, signature);
-  const contractOwner = process.env.NEXT_PUBLIC_DEPLOYER_ADDRESS || "";
-  return recoveredAddress === contractOwner;
-}
+import {
+  ApiGenerateCodesResponseData,
+  GenerateCodesRequestBody,
+} from "@/components/modules/GenerateCodes";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);
@@ -40,26 +36,34 @@ function getCodesFactoryContract() {
   return codesFactoryContractWrite;
 }
 
-async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
+async function generateCodes(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiGenerateCodesResponseData>
+) {
   await connectToDatabase();
 
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
+    res.status(405).json({ message: "Method not allowed." });
     return;
   }
 
-  const { amount: amountStr, numberOfCodes, signature, timestamp } = req.body;
+  const {
+    amount: amountStr,
+    numberOfCodes,
+    signature,
+    timestamp,
+  } = req.body as GenerateCodesRequestBody;
 
   // Check if the request has all the required fields
   if (!amountStr || !numberOfCodes || !signature || !timestamp) {
-    res.status(400).json({ error: "Missing required fields" });
+    res.status(400).json({ message: "Missing required fields." });
     return;
   }
 
   // Check if the timestamp is recent (e.g., within the last 5 minutes)
   const currentTime = Date.now();
   if (currentTime - timestamp > 5 * 60 * 1000) {
-    res.status(400).json({ error: "Timestamp is too old" });
+    res.status(400).json({ message: "Timestamp is too old." });
     return;
   }
 
@@ -71,19 +75,18 @@ async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
   const isValid = await verifySignature(message, signature);
 
   if (!isValid) {
-    res.status(403).json({ error: "Invalid signature" });
+    res.status(403).json({ message: "Invalid signature." });
     return;
   }
 
   // Generate secret codes and Merkle tree
-  const secretCodes = generateSecretCodes(numberOfCodes);
+  const secretCodes = generateSecretCodes(parseInt(numberOfCodes));
   const merkleTree = generateMerkleTree(secretCodes, amount);
-  const merkleRoot = merkleTree.root;
   const merkleDump = JSON.stringify(merkleTree.dump(), stringifyBigIntValue);
 
   // Store secret codes and associated data in MongoDB
   const codesTreeToInsert: Partial<ICodesTree> = {
-    merkleRoot,
+    merkleRoot: merkleTree.root,
     amount: amountStr,
     merkleDump,
     secretCodes,
@@ -93,7 +96,7 @@ async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
     // Call the addMerkleRoot function from the CodesFactory contract
     const codesFactoryContractWrite = getCodesFactoryContract();
     const addMerkleRootTx = await codesFactoryContractWrite.addMerkleRoot(
-      merkleRoot,
+      merkleTree.root,
       numberOfCodes,
       amount
     );
@@ -102,7 +105,7 @@ async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
     if (txReceipt.status !== 1) {
       res
         .status(500)
-        .json({ error: "Failed to add Merkle root to the contract" });
+        .json({ message: "Failed to add Merkle root to the contract." });
       return;
     }
 
@@ -112,11 +115,13 @@ async function generateCodes(req: NextApiRequest, res: NextApiResponse) {
 
     // Save the Merkle tree root and codes in the database
     const insertedCodesTree = await CodesTreeModel.create(codesTreeToInsert);
-    res.status(201).json(insertedCodesTree);
+    res
+      .status(201)
+      .json({ merkleRootIndex: insertedCodesTree.merkleRootIndex });
   } catch (error) {
     res
       .status(500)
-      .json({ error: "Error storing secret codes tree in database" });
+      .json({ message: "Error storing secret codes tree in database." });
   }
 }
 

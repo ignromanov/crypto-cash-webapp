@@ -7,7 +7,7 @@ const CodesTreeSchema = new Schema({
     required: true,
   },
   merkleRootIndex: {
-    type: Number,
+    type: String,
     required: true,
     default: -1,
   },
@@ -27,10 +27,10 @@ const CodesTreeSchema = new Schema({
   ],
 });
 
-CodesTreeSchema.index({ merkleRootIndex: 1, secretCodes: 1 });
+CodesTreeSchema.index({ merkleRoot: 1, secretCodes: 1 });
 
 const CodesTreeModel =
-  mongoose.models.CodesTree ||
+  (mongoose.models.CodesTree as mongoose.Model<ICodesTree>) ||
   mongoose.model<ICodesTree>("CodesTree", CodesTreeSchema);
 
 export default CodesTreeModel;

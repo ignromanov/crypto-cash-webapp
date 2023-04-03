@@ -2,7 +2,7 @@ import { Document } from "mongoose";
 
 export interface ICodesTree extends Document {
   merkleRoot: string;
-  merkleRootIndex: number;
+  merkleRootIndex: string;
   amount: string;
   merkleDump: string;
   secretCodes: string[];

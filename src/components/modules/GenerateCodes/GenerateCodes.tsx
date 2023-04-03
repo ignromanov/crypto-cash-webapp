@@ -1,69 +1,30 @@
 import React, { useState } from "react";
 import useExecStatus from "@/hooks/useExecStatus";
-import axios from "axios";
-import useMetamask from "@/hooks/useMetamask";
 import { Card } from "@/components/layouts/Card";
-import { getMessageToSign } from "@/utils/secretCodes";
-import { formatEther, parseEther } from "ethers";
+import { parseEther } from "ethers";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
+import useGenerateCodesApi from "@/hooks/useGenerateCodesApi";
 
 const GenerateCodes: React.FC = () => {
-  const { provider } = useMetamask();
   const [numberOfCodes, setNumberOfCodes] = useState("");
   const [amount, setAmount] = useState<string>("");
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
-  const signMessage = async (message: string) => {
-    if (!provider) {
-      return "";
-    }
-    const signer = await provider.getSigner();
-    const signature = await signer.signMessage(message);
-    return signature;
-  };
-
-  const sendRequest = async (amount: BigInt, numberOfCodes: string) => {
-    const timestamp = Date.now();
-    const messageToSign = getMessageToSign(amount, numberOfCodes, timestamp);
-    const signature = await signMessage(messageToSign);
-
-    const response = await axios.post("/api/generate-codes", {
-      // @ts-ignore
-      amount: formatEther(amount),
-      numberOfCodes,
-      signature,
-      timestamp,
-    });
-
-    return response;
-  };
+  const { sendRequest } = useGenerateCodesApi(updateExecStatus);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearExecStatus();
-    updateExecStatus({
-      pending: true,
-      message: "Generating secret codes...",
-    });
-
-    try {
-      const response = await sendRequest(parseEther(amount), numberOfCodes);
-      if (response.status !== 201) {
-        throw Error(response.data.error);
-      }
-
+    if (!amount || !numberOfCodes) {
       updateExecStatus({
-        pending: false,
-        success: true,
-        message: `Secret codes generated successfully with RootIndex: ${response.data.merkleRootIndex}!`,
-      });
-    } catch (error) {
-      updateExecStatus({
+        message: "Specify the required parameters",
         pending: false,
         success: false,
-        message: `Error generating secret codes! ${error}`,
       });
+      return;
     }
+
+    clearExecStatus();
+    await sendRequest(parseEther(amount), numberOfCodes);
   };
 
   return (
@@ -97,7 +58,9 @@ const GenerateCodes: React.FC = () => {
           />
         </div>
 
-        <button>Generate Secret Codes</button>
+        <button disabled={!amount || !numberOfCodes}>
+          Generate Secret Codes
+        </button>
         <ExecStatusDisplay execStatus={execStatus} />
       </form>
     </Card>

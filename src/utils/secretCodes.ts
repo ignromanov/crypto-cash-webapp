@@ -6,6 +6,7 @@ import {
   hexlify,
   keccak256,
   randomBytes,
+  verifyMessage,
 } from "ethers";
 import { DataHexString } from "ethers/types/utils/data";
 
@@ -15,6 +16,12 @@ function getMessageToSign(
   timestamp: number
 ) {
   return `Generate Codes Request\nAmount: ${amount}\nNumber of Codes: ${numberOfCodes}\nTimestamp: ${timestamp}`;
+}
+
+async function verifySignature(message: string, signature: string) {
+  const recoveredAddress = verifyMessage(message, signature);
+  const contractOwner = process.env.NEXT_PUBLIC_DEPLOYER_ADDRESS || "";
+  return recoveredAddress === contractOwner;
 }
 
 function generateSecretCodes(count: number): DataHexString[] {
@@ -47,4 +54,5 @@ export {
   generateRandomNonce,
   calculateHash,
   getMessageToSign,
+  verifySignature,
 };
