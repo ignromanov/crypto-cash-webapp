@@ -10,8 +10,8 @@ const getMerkleProof = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (typeof merkleRootIndex !== "string" || typeof secretCode !== "string") {
     res.status(400).json({
-      error:
-        "Invalid request parameters: merkleRootIndex & secretCode & amount must be strings",
+      message:
+        "Invalid request parameters: merkleRootIndex & secretCode & amount must be strings.",
     });
     return;
   }
@@ -23,7 +23,7 @@ const getMerkleProof = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!codesTree) {
-      res.status(404).json({ error: "Merkle root not found." });
+      res.status(404).json({ message: "Merkle root not found." });
       return;
     }
 
@@ -33,7 +33,7 @@ const getMerkleProof = async (req: NextApiRequest, res: NextApiResponse) => {
     if (leafIndex === -1) {
       res
         .status(404)
-        .json({ error: "Secret code not found in the Merkle tree." });
+        .json({ message: "Secret code not found in the Merkle tree." });
       return;
     }
 
@@ -43,7 +43,7 @@ const getMerkleProof = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     res
       .status(500)
-      .json({ error: "An error occurred while fetching Merkle proof." });
+      .json({ message: "An error occurred while fetching Merkle proof." });
   }
 };
 

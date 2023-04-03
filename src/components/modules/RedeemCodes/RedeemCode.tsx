@@ -113,22 +113,13 @@ const RedeemCode: React.FC = () => {
       )}
 
       <button
-        className={`${
-          !dataToRedeem || isCodeCommitted
-            ? "opacity-50 cursor-not-allowed"
-            : ""
-        }`}
         onClick={handleCommitWrapper}
         disabled={!dataToRedeem || isCodeCommitted}
       >
         Commit Code
       </button>
       <button
-        className={`mt-4 ${
-          !isCodeCommitted || isCodeRevealed
-            ? "opacity-50 cursor-not-allowed"
-            : ""
-        }`}
+        className={"mt-4"}
         onClick={handleRevealWrapper}
         disabled={!isCodeCommitted || isCodeRevealed}
       >

@@ -1,5 +1,9 @@
 import { useCallback, useReducer } from "react";
-import { ExecStatus } from "./useExecStatus.types";
+import {
+  ClearExecStatus,
+  ExecStatus,
+  UpdateExecStatus,
+} from "./useExecStatus.types";
 
 const execStatusReducer = (
   prevExecStatus: ExecStatus,
@@ -14,11 +18,7 @@ const execStatusInitial: ExecStatus = {
   message: "",
 };
 
-const useExecStatus = (): [
-  ExecStatus,
-  (status: Partial<ExecStatus>) => void,
-  () => void
-] => {
+const useExecStatus = (): [ExecStatus, UpdateExecStatus, ClearExecStatus] => {
   const [execStatus, dispatch] = useReducer(
     execStatusReducer,
     execStatusInitial

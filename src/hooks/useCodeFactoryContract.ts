@@ -8,12 +8,11 @@ import {
 import useMetamask from "./useMetamask";
 import { generateRandomNonce, calculateHash } from "@/utils/secretCodes";
 import axios from "axios";
-import { ExecStatus } from "./useExecStatus.types";
+import { UpdateExecStatus } from "./useExecStatus.types";
 import { CodeData, Keccak256Hash } from "@/types/codes";
+import { handleApiError } from "@/utils/api";
 
-const useCodesFactoryContract = (
-  updateExecStatus: (status: Partial<ExecStatus>) => void
-) => {
+const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
   const { signer, account } = useMetamask();
   const [codesFactoryContract, setCodesFactoryContract] =
     useState<CodesFactoryContractType | null>(null);
@@ -39,8 +38,6 @@ const useCodesFactoryContract = (
 
       if (response.status === 200) {
         return response.data.merkleProof;
-      } else {
-        throw Error("Error fetching Merkle proof");
       }
     },
     []
@@ -77,11 +74,11 @@ const useCodesFactoryContract = (
         });
         await commitTx.wait();
       } catch (error) {
-        console.error(error);
+        const errorMessage = handleApiError(error);
         updateExecStatus({
           pending: false,
           success: false,
-          message: "Error commiting code!",
+          message: `Error commiting code! ${errorMessage}`,
         });
         return false;
       }
@@ -143,11 +140,11 @@ const useCodesFactoryContract = (
 
         localStorage.removeItem(nonceStorageKey);
       } catch (error) {
-        console.error(error);
+        const errorMessage = handleApiError(error);
         updateExecStatus({
           pending: false,
           success: false,
-          message: "Error redeeming code!",
+          message: `Error redeeming code! ${errorMessage}`,
         });
         return false;
       }

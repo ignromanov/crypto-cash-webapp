@@ -10,7 +10,7 @@ export async function generateQrCodeImage(
   try {
     const qrCodeDataURL = await QRCode.toDataURL(stringifyData);
     return qrCodeDataURL;
-  } catch (error: any) {
-    throw new Error(`Error generating QR code image: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Error generating QR code image: ${error}`);
   }
 }
