@@ -6,17 +6,17 @@ import {
   codesFactoryContractAddress,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
-import {
-  stMadTokenContractAbi,
-  stMadTokenContractAddress,
-  StMadTokenType,
-} from "@/contracts/stMadToken";
 import { Card } from "@/components/layouts/Card";
+import {
+  cSHTokenContractAddress,
+  cSHTokenContractAbi,
+  CSHTokenType,
+} from "@/contracts/cSHToken";
 
 const Balances: React.FC = () => {
   const { account, provider } = useMetamask();
   const [ethBalance, setEthBalance] = useState("");
-  const [stMadTokenBalance, setStMadTokenBalance] = useState("");
+  const [CSHTokenBalance, setCSHTokenBalance] = useState("");
   const [codesFactoryTokenBalance, setCodesFactoryTokenBalance] = useState("");
   const [merkleRoots, setMerkleRoots] = useState<string[]>([]);
 
@@ -28,11 +28,11 @@ const Balances: React.FC = () => {
     const fetchData = async () => {
       const signer = await provider.getSigner();
 
-      const stMadTokenContractRead = new ethers.BaseContract(
-        stMadTokenContractAddress,
-        stMadTokenContractAbi,
+      const cSHTokenContractRead = new ethers.BaseContract(
+        cSHTokenContractAddress,
+        cSHTokenContractAbi,
         signer
-      ) as unknown as StMadTokenType;
+      ) as unknown as CSHTokenType;
       const codesFactoryContractRead = new ethers.BaseContract(
         codesFactoryContractAddress,
         codesFactoryContractAbi,
@@ -43,13 +43,13 @@ const Balances: React.FC = () => {
       const ethBalance = await provider.getBalance(account);
       setEthBalance(formatEther(ethBalance));
 
-      // Get stMadToken balance
-      const stMadTokenBalance = await stMadTokenContractRead.balanceOf(account);
+      // Get CSHToken balance
+      const cSHTokenBalance = await cSHTokenContractRead.balanceOf(account);
       // @ts-ignore
-      setStMadTokenBalance(formatEther(stMadTokenBalance));
+      setCSHTokenBalance(formatEther(cSHTokenBalance));
 
       // Get CodesFactory token balance
-      const codesFactoryTokenBalance = await stMadTokenContractRead.balanceOf(
+      const codesFactoryTokenBalance = await cSHTokenContractRead.balanceOf(
         codesFactoryContractAddress
       );
       // @ts-ignore
@@ -90,9 +90,9 @@ const Balances: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <p className="text-base">Ethers:</p>
           <p className="text-base font-medium">{ethBalance}</p>
-          <p className="text-base">stMad Tokens:</p>
-          <p className="text-base font-medium">{stMadTokenBalance}</p>
-          <p className="text-base">CodesFactory stMad Tokens:</p>
+          <p className="text-base">CSH Tokens:</p>
+          <p className="text-base font-medium">{CSHTokenBalance}</p>
+          <p className="text-base">CodesFactory CSH Tokens:</p>
           <p className="text-base font-medium">{codesFactoryTokenBalance}</p>
         </div>
       </div>
