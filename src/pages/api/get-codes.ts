@@ -5,19 +5,22 @@ import connectToDatabase from "@/utils/mongoose";
 import { loadMerkleTree } from "@/utils/merkleTree";
 import { formatEther, parseEther } from "ethers";
 import { CodeData, Keccak256Hash } from "@/types/codes";
-import { ApiGetCodesResponseData } from "@/components/modules/DisplayCodes";
+import {
+  ApiGetCodesResponseData,
+  GetCodesResponseData,
+} from "@/components/modules/DisplayCodes";
 import { stringifyCodeData } from "@/utils/convertCodeData";
 
 async function getCodes(
   req: NextApiRequest,
   res: NextApiResponse<ApiGetCodesResponseData>
 ) {
-  const { merkleRootIndex, includeProof } = req.query;
+  const { merkleRootCode, includeProof } = req.query;
   const withProof = includeProof === "true";
 
-  if (typeof merkleRootIndex !== "string") {
+  if (typeof merkleRootCode !== "string") {
     res.status(400).json({
-      error: "Invalid request parameters: merkleRootIndex must be a string",
+      message: "Invalid request parameters: merkleRootCode must be a string.",
     });
     return;
   }
@@ -25,7 +28,7 @@ async function getCodes(
   await connectToDatabase();
 
   const codesTree: ICodesTree | null = await CodesTreeModel.findOne({
-    merkleRootIndex: parseInt(merkleRootIndex),
+    merkleRoot: merkleRootCode,
   });
 
   if (codesTree) {
@@ -41,7 +44,7 @@ async function getCodes(
         const codeData: CodeData = {
           secretCode,
           amount,
-          merkleRootIndex,
+          merkleRootIndex: codesTree.merkleRootIndex,
           leafHash,
         };
 
@@ -54,15 +57,14 @@ async function getCodes(
       })
     );
 
-    const response = {
-      status: "success" as const,
+    const response: GetCodesResponseData = {
       codesData,
       amount: formatEther(amount),
     };
 
     res.status(200).json(response);
   } else {
-    res.status(404).json({ error: "Merkle root index not found" });
+    res.status(404).json({ message: "Merkle root index not found." });
   }
 }
 

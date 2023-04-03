@@ -1,5 +1,5 @@
 type ResponseError = {
-  error: string;
+  message: string;
 };
 
 export type { ResponseError };

@@ -22,3 +22,7 @@ select {
 button {
   @apply w-full px-4 py-2 rounded-md bg-cryptocash-primary text-gray-900;
 }
+
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}

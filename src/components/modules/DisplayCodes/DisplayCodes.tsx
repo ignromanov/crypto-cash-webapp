@@ -1,31 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
 import useExecStatus from "@/hooks/useExecStatus";
-import axios from "axios";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Card } from "@/components/layouts/Card";
 import { generateQrCodeImage } from "@/utils/qrCode";
 import { Badge } from "@/components/elements/Badge";
-import { CodeData, Keccak256Hash } from "@/types/codes";
-import {
-  ApiGetCodesResponseData,
-  GetCodesResponseData,
-} from "./DisplayCodes.types";
-import { ResponseError } from "@/types/api";
-import { parseCodeData, stringifyCodeData } from "@/utils/convertCodeData";
+import { Keccak256Hash } from "@/types/codes";
+import { stringifyCodeData } from "@/utils/convertCodeData";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
+import useGetCodesApi from "@/hooks/useGetCodesApi";
 
 const DisplayCodes: React.FC = () => {
-  const [merkleRootIndex, setMerkleRootIndex] = useState("");
+  const [merkleRootCode, setMerkleRootCode] = useState("");
   const [includeProof, setIncludeProof] = useState(false);
-  const [codesData, setCodesData] = useState<CodeData[]>([]);
   const [redeemedLeaves, setRedeemedLeaves] = useState<Keccak256Hash[]>([]);
   const [qrCodesImages, setQrCodesImages] = useState<string[]>([]);
-  const [amount, setAmount] = useState("");
   const [merkleRoots, setMerkleRoots] = useState<string[]>([]);
 
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const { filterRedeemedLeaves, fetchMerkleRoots } =
     useCodesFactoryContract(updateExecStatus);
+  const { codesData, amount, requestCodes } = useGetCodesApi(updateExecStatus);
 
   useEffect(() => {
     const fetch = async () => {
@@ -33,55 +27,47 @@ const DisplayCodes: React.FC = () => {
       setMerkleRoots(merkleRoots);
     };
     fetch();
+
+    // update MerkleRoots every 5 seconds
+    const intervalId = setInterval(() => {
+      fetch();
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [fetchMerkleRoots]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setCodesData([]);
-    setQrCodesImages([]);
-    clearExecStatus();
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
-    updateExecStatus({ pending: true, message: "Fetching codes..." });
-
-    try {
-      const response = await axios.get<ApiGetCodesResponseData>(
-        "/api/get-codes",
-        {
-          params: { merkleRootIndex, includeProof },
-        }
-      );
-
-      if (response.status !== 200) {
-        throw Error((response.data as ResponseError).error);
+      if (!merkleRootCode) {
+        updateExecStatus({
+          message: "Specify the required parameters",
+          pending: false,
+          success: false,
+        });
+        return;
       }
+      setQrCodesImages([]);
+      clearExecStatus();
 
-      const responseData = response.data as GetCodesResponseData;
-      const codesData = responseData.codesData.map(parseCodeData);
-      setCodesData(codesData);
-      setAmount(responseData.amount);
-
-      const images = await Promise.all(
-        responseData.codesData.map(generateQrCodeImage)
+      const { codesDataStr, codesData } = await requestCodes(
+        merkleRootCode,
+        includeProof
       );
+
+      const images = await Promise.all(codesDataStr.map(generateQrCodeImage));
       setQrCodesImages(images);
+
       const redeemedLeaves = await filterRedeemedLeaves(
         codesData.map(({ leafHash }) => leafHash)
       );
       setRedeemedLeaves(redeemedLeaves);
-
-      updateExecStatus({
-        pending: false,
-        success: true,
-        message: "QR codes fetched successfully!",
-      });
-    } catch (error) {
-      updateExecStatus({
-        pending: false,
-        success: false,
-        message: `Error fetching QR codes! ${error}`,
-      });
-    }
-  };
+    },
+    [merkleRootCode, includeProof, requestCodes, codesData, clearExecStatus]
+  );
 
   const handleQrCodeClick = useCallback(
     async (codeIndex: number) => {
@@ -95,6 +81,7 @@ const DisplayCodes: React.FC = () => {
           message: "QR code data copied to clipboard",
         });
       } catch (error) {
+        console.error(error);
         updateExecStatus({
           pending: false,
           success: false,
@@ -141,16 +128,20 @@ const DisplayCodes: React.FC = () => {
             htmlFor="merkleRootIndex"
             className="block text-sm font-medium mb-2"
           >
-            Choose Merkle Tree
+            Merkle Tree Root
           </label>
           <select
             id="merkleRootIndex"
-            value={merkleRootIndex}
-            onChange={(e) => setMerkleRootIndex(e.target.value)}
+            value={merkleRootCode}
+            onChange={(e) => setMerkleRootCode(e.target.value)}
             className="w-full p-2"
           >
+            <option value="">Select a Merkle Root</option>
             {merkleRoots.map((rootCode, index) => (
-              <option value={index}>{`${index}) ${rootCode}`}</option>
+              <option
+                value={rootCode}
+                key={rootCode}
+              >{`${index}) ${rootCode}`}</option>
             ))}
           </select>
         </div>
@@ -167,7 +158,7 @@ const DisplayCodes: React.FC = () => {
           </label>
         </div>
 
-        <button>Fetch QR Codes</button>
+        <button disabled={!merkleRootCode}>Fetch QR Codes</button>
         <ExecStatusDisplay execStatus={execStatus} />
       </form>
 
