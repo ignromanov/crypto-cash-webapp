@@ -88,11 +88,11 @@ const Balances: React.FC = () => {
       <div className="p-4 bg-gray-100 rounded-t-md">
         <h2 className="text-2xl font-semibold mb-4">Balances</h2>
         <div className="grid grid-cols-2 gap-4">
-          <p className="text-base">Ether balance:</p>
+          <p className="text-base">Ethers:</p>
           <p className="text-base font-medium">{ethBalance}</p>
-          <p className="text-base">stMadToken balance:</p>
+          <p className="text-base">stMad Tokens:</p>
           <p className="text-base font-medium">{stMadTokenBalance}</p>
-          <p className="text-base">CodesFactory token balance:</p>
+          <p className="text-base">CodesFactory stMad Tokens:</p>
           <p className="text-base font-medium">{codesFactoryTokenBalance}</p>
         </div>
       </div>
