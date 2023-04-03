@@ -1,3 +1,5 @@
+import { Balances } from "@/components/modules/Balances";
+
 export default () => {
-  return "Home page";
+  return <Balances />;
 };

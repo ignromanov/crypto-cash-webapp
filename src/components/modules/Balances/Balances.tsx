@@ -56,31 +56,57 @@ const Balances: React.FC = () => {
       setCodesFactoryTokenBalance(formatEther(codesFactoryTokenBalance));
 
       // Get Merkle roots
-      // Replace this with the actual method to fetch Merkle roots
       const merkleRoots = await codesFactoryContractRead.getMerkleRoots();
       setMerkleRoots(merkleRoots);
     };
 
     fetchData();
+
+    // update Data every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [provider, account]);
 
   return (
     <Card>
-      <h2 className="text-2xl font-semibold mb-4">Balances</h2>
-      <p className="text-base mb-2">Ether balance: {ethBalance}</p>
-      <p className="text-base mb-2">stMadToken balance: {stMadTokenBalance}</p>
-      <p className="text-base mb-6">
-        CodesFactory token balance: {codesFactoryTokenBalance}
-      </p>
+      <div className="p-4">
+        <h2 className="text-2xl font-semibold mb-4">Welcome</h2>
+        <p className="text-base mb-6">
+          Welcome to the CryptoCash Platform, a secure and innovative solution
+          for generating and redeeming token-based codes. Our platform empowers
+          users to create secret codes tied to specific amounts of tokens,
+          providing a seamless and user-friendly experience. Explore our
+          easy-to-use interface and discover the power of secure code generation
+          and redemption on the blockchain.
+        </p>
+      </div>
+      <div className="p-4 bg-gray-100 rounded-t-md">
+        <h2 className="text-2xl font-semibold mb-4">Balances</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <p className="text-base">Ether balance:</p>
+          <p className="text-base font-medium">{ethBalance}</p>
+          <p className="text-base">stMadToken balance:</p>
+          <p className="text-base font-medium">{stMadTokenBalance}</p>
+          <p className="text-base">CodesFactory token balance:</p>
+          <p className="text-base font-medium">{codesFactoryTokenBalance}</p>
+        </div>
+      </div>
 
-      <h2 className="text-2xl font-semibold mb-4">Merkle Roots</h2>
-      <ul className="list-disc list-inside">
-        {merkleRoots.map((root, index) => (
-          <li key={index} className="text-base my-1">
-            {index}: {root}
-          </li>
-        ))}
-      </ul>
+      <div className="p-4">
+        <h2 className="text-2xl font-semibold mb-4">Merkle Roots</h2>
+        <ul className="list-disc list-inside">
+          {merkleRoots.map((root, index) => (
+            <li key={index} className="text-base my-1">
+              <span className="font-medium">{index}:</span> {root}
+            </li>
+          ))}
+        </ul>
+      </div>
     </Card>
   );
 };
