@@ -18,6 +18,8 @@ const Sidebar: React.FC = () => {
                   src={link.icon}
                   alt={`${link.label} icon`}
                   className="inline-block mr-2"
+                  width={24}
+                  height={24}
                 />
                 {link.label}
               </Link>

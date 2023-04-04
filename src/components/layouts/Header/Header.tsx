@@ -15,6 +15,8 @@ const Header: React.FC<Props> = ({ projectName }) => {
             src="/logo.png"
             alt={`${projectName} Logo`}
             className="h-10 mr-2"
+            height={40}
+            width={100}
           />
         </Link>
         <div className="text-lg font-medium">
