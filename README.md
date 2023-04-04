@@ -4,7 +4,7 @@ CryptoCash is a token-based system that allows users to generate and redeem secr
 
 [Smart Contracts Repository](https://github.com/ignromanov/crypto-cash-contracts)
 
-[Run Demo Application](https://demo.crypto-cash.app)
+[Run Demo Application](https://crypto-cash-webapp.vercel.app/)
 
 ## Features
 
