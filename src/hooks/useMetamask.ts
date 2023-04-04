@@ -29,6 +29,8 @@ const useMetamask = () => {
         const signer = await browserProvider.getSigner();
         setSigner(signer);
 
+        // TODO: waiting for ethers v6 supporting
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const accounts = await ethereumProvider.request({
           method: "eth_accounts",

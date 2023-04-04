@@ -110,6 +110,8 @@ async function generateCodes(
     }
 
     // Get the Merkle tree index from the transaction event
+    // TODO: waiting for ethers v6 supporting
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     codesTreeToInsert.merkleRootIndex = Number(txReceipt.logs[1].args[0]);
 

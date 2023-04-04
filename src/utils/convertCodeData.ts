@@ -1,10 +1,10 @@
 import { CodeData } from "@/types/codes";
 import { formatEther, parseEther } from "ethers";
 
-const stringifyBigIntValue = (_: string, value: any) =>
+const stringifyBigIntValue = (_: string, value: unknown) =>
   typeof value === "bigint" ? `BIGINT::${formatEther(value)}` : value;
 
-const parseBigIntValue = (key: string, value: any) => {
+const parseBigIntValue = (key: string, value: unknown) => {
   if (typeof value === "string" && value.startsWith("BIGINT::")) {
     return parseEther(value.substring(8));
   }

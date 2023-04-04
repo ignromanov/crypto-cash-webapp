@@ -66,7 +66,14 @@ const DisplayCodes: React.FC = () => {
       );
       setRedeemedLeaves(redeemedLeaves);
     },
-    [merkleRootCode, includeProof, requestCodes, codesData, clearExecStatus]
+    [
+      merkleRootCode,
+      clearExecStatus,
+      requestCodes,
+      includeProof,
+      filterRedeemedLeaves,
+      updateExecStatus,
+    ]
   );
 
   const handleQrCodeClick = useCallback(
@@ -89,7 +96,7 @@ const DisplayCodes: React.FC = () => {
         });
       }
     },
-    [codesData]
+    [codesData, updateExecStatus]
   );
 
   const renderQrCodeImage = (qrCodeImage: string, index: number) => {

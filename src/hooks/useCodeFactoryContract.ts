@@ -105,7 +105,8 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
       });
 
       try {
-        let { secretCode, merkleProof, merkleRootIndex, amount } = dataToRedeem;
+        const { secretCode, merkleRootIndex, amount } = dataToRedeem;
+        let { merkleProof } = dataToRedeem;
 
         // get commitment nonce
         const nonceStorageKey = `commitment_nonce_${calculateHash(
@@ -120,12 +121,15 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
         // request Merkle proof from the server if not provided
         if (!merkleProof) {
           merkleProof = await requestMerkleProof(secretCode, merkleRootIndex);
+          if (!merkleProof) throw new Error("Merkle proof not found.");
         }
 
         // call the redeemCode function on the contract
         const redeemTx = await codesFactoryContract.revealCode(
           merkleRootIndex,
           secretCode,
+          // TODO: waiting for ethers v6 supporting
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           amount,
           BigInt(storedNonce),
@@ -156,7 +160,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
       });
       return true;
     },
-    [codesFactoryContract, updateExecStatus]
+    [codesFactoryContract, requestMerkleProof, updateExecStatus]
   );
 
   const filterRedeemedLeaves = useCallback(

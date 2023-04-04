@@ -5,7 +5,12 @@
     "node": true,
     "mongo": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -17,10 +22,17 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["react", "prettier"],
+  "plugins": ["react", "prettier", "react-hooks", "@typescript-eslint"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
     "prettier/prettier": "error",
     "react/prop-types": "off",
-    "no-console": "warn"
+    "no-console": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }

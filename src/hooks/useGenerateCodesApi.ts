@@ -15,7 +15,7 @@ const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
   const { provider } = useMetamask();
 
   const sendRequest = useCallback(
-    async (amount: BigInt, numberOfCodes: string) => {
+    async (amount: bigint, numberOfCodes: string) => {
       const signMessage = async (message: string) => {
         if (!provider) {
           return "";
@@ -42,6 +42,8 @@ const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
         const response = await axios.post<ApiGenerateCodesResponseData>(
           "/api/generate-codes",
           {
+            // TODO: waiting for ethers v6 supporting
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             amount: formatEther(amount),
             numberOfCodes,

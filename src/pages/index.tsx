@@ -1,5 +1,8 @@
 import { Balances } from "@/components/modules/Balances";
+import React from "react";
 
-export default () => {
+const MainPage: React.FC = () => {
   return <Balances />;
 };
+
+export default MainPage;

@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Card } from "@/components/layouts/Card";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { generateQrCodeImage } from "@/utils/qrCode";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
-import { formatEther, parseEther } from "ethers";
+import { formatEther } from "ethers";
 import { Badge } from "@/components/elements/Badge";
 import { CodeData } from "@/types/codes";
 import { parseCodeData } from "@/utils/convertCodeData";
@@ -27,13 +27,13 @@ const RedeemCode: React.FC = () => {
     clearExecStatus();
     const success = await handleCommit(dataToRedeem);
     setIsCodeCommitted(success);
-  }, [dataToRedeem, handleCommit]);
+  }, [clearExecStatus, dataToRedeem, handleCommit]);
 
   const handleRevealWrapper = useCallback(async () => {
     clearExecStatus();
     const success = await handleReveal(dataToRedeem);
     setIsCodeRevealed(success);
-  }, [dataToRedeem, handleReveal]);
+  }, [clearExecStatus, dataToRedeem, handleReveal]);
 
   const handleQrCodeTextChange = useCallback(
     async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -97,6 +97,8 @@ const RedeemCode: React.FC = () => {
       {dataToRedeem && (
         <div className="mb-4 flex items-center justify-center space-x-4 ">
           <Badge
+            // TODO: waiting for ethers v6 supporting
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             caption={`Amount: ${formatEther(dataToRedeem.amount)}`}
             status={null}

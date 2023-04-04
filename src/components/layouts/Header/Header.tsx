@@ -10,7 +10,11 @@ const Header: React.FC<Props> = ({ projectName }) => {
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
-          <img src="/logo.png" alt="CryptoCash Logo" className="h-10 mr-2" />
+          <img
+            src="/logo.png"
+            alt={`${projectName} Logo`}
+            className="h-10 mr-2"
+          />
         </Link>
         <div className="text-lg font-medium">
           <span className="text-sm mr-2">Connected account:</span>

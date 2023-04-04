@@ -9,14 +9,14 @@ function loadMerkleTree(merkleDump: string) {
   return merkleTree;
 }
 
-function getMerkleTree(leaves: [DataHexString, BigInt][]) {
+function getMerkleTree(leaves: [DataHexString, bigint][]) {
   const merkleTree = StandardMerkleTree.of(leaves, ["bytes32", "uint256"]);
   return merkleTree;
 }
 
-function generateMerkleTree(secretCodes: string[], amount: BigInt) {
+function generateMerkleTree(secretCodes: string[], amount: bigint) {
   const leaves = secretCodes.map(
-    (code) => [code, amount] as [DataHexString, BigInt]
+    (code) => [code, amount] as [DataHexString, bigint]
   );
   const merkleTree = getMerkleTree(leaves);
   return merkleTree;

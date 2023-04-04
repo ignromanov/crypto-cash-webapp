@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const handleApiError = (error: any) => {
+const handleApiError = (error: unknown) => {
   console.error(error);
 
   let errorMessage =

@@ -11,7 +11,7 @@ import {
 import { DataHexString } from "ethers/types/utils/data";
 
 function getMessageToSign(
-  amount: BigInt,
+  amount: bigint,
   numberOfCodes: string,
   timestamp: number
 ) {
@@ -35,14 +35,14 @@ function generateSecretCodes(count: number): DataHexString[] {
   return codes;
 }
 
-function generateRandomNonce(): BigInt {
+function generateRandomNonce(): bigint {
   const randomArray = randomBytes(8);
   const view = new DataView(randomArray.buffer, 0);
   const randomInt = view.getBigUint64(0, true);
   return randomInt;
 }
 
-function calculateHash(code: BytesLike, number: BigInt): Keccak256Hash {
+function calculateHash(code: BytesLike, number: bigint): Keccak256Hash {
   const abiCoder = AbiCoder.defaultAbiCoder();
   const encoded = abiCoder.encode(["bytes32", "uint256"], [code, number]);
   const keccak256Encoded = keccak256(encoded);

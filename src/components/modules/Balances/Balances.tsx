@@ -45,6 +45,8 @@ const Balances: React.FC = () => {
 
       // Get CSHToken balance
       const cSHTokenBalance = await cSHTokenContractRead.balanceOf(account);
+      // TODO: waiting for ethers v6 supporting
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       setCSHTokenBalance(formatEther(cSHTokenBalance));
 
@@ -52,6 +54,8 @@ const Balances: React.FC = () => {
       const codesFactoryTokenBalance = await cSHTokenContractRead.balanceOf(
         codesFactoryContractAddress
       );
+      // TODO: waiting for ethers v6 supporting
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       setCodesFactoryTokenBalance(formatEther(codesFactoryTokenBalance));
 

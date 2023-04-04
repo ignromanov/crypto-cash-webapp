@@ -2,7 +2,6 @@ import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
 import { loadMerkleTree } from "@/utils/merkleTree";
 import connectToDatabase from "@/utils/mongoose";
-import { calculateHash } from "@/utils/secretCodes";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const getMerkleProof = async (req: NextApiRequest, res: NextApiResponse) => {
