@@ -5,5 +5,6 @@ const codesFactoryContractAddress =
   process.env.NEXT_PUBLIC_CODES_CONTRACT_ADDRESS || "";
 const codesFactoryContractAbi = CodesFactoryArtifact.abi;
 
-export type CodesFactoryContractType = unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CodesFactoryContractType = any;
 export { codesFactoryContractAddress, codesFactoryContractAbi };

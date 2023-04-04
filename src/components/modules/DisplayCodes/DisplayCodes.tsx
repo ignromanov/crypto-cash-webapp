@@ -8,6 +8,7 @@ import { Keccak256Hash } from "@/types/codes";
 import { stringifyCodeData } from "@/utils/convertCodeData";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useGetCodesApi from "@/hooks/useGetCodesApi";
+import Image from "next/image";
 
 const DisplayCodes: React.FC = () => {
   const [merkleRootCode, setMerkleRootCode] = useState("");
@@ -109,7 +110,7 @@ const DisplayCodes: React.FC = () => {
         onClick={() => handleQrCodeClick(index)}
       >
         <div className="relative">
-          <img
+          <Image
             src={qrCodeImage}
             alt={`QR Code ${index + 1}`}
             className="w-full h-auto"

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { links } from "./Sidebar.constants";
+import Image from "next/image";
 
 const Sidebar: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const Sidebar: React.FC = () => {
                 href={link.href}
                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-cryptocash-secondary rounded-md"
               >
-                <img
+                <Image
                   src={link.icon}
                   alt={`${link.label} icon`}
                   className="inline-block mr-2"

@@ -2,6 +2,7 @@ import useMetamask from "@/hooks/useMetamask";
 import Link from "next/link";
 import React from "react";
 import { Props } from "./Header.types";
+import Image from "next/image";
 
 const Header: React.FC<Props> = ({ projectName }) => {
   const { account } = useMetamask();
@@ -10,7 +11,7 @@ const Header: React.FC<Props> = ({ projectName }) => {
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
-          <img
+          <Image
             src="/logo.png"
             alt={`${projectName} Logo`}
             className="h-10 mr-2"

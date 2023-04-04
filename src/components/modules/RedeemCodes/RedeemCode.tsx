@@ -8,6 +8,7 @@ import { formatEther } from "ethers";
 import { Badge } from "@/components/elements/Badge";
 import { CodeData } from "@/types/codes";
 import { parseCodeData } from "@/utils/convertCodeData";
+import Image from "next/image";
 
 const RedeemCode: React.FC = () => {
   const [dataToRedeem, setDataToRedeem] = useState<CodeData | null>(null);
@@ -83,7 +84,7 @@ const RedeemCode: React.FC = () => {
       </div>
       <div className="mb-4 relative flex items-center justify-center">
         {qrCodeImage ? (
-          <img
+          <Image
             src={qrCodeImage}
             alt={`QR Code`}
             className="w-auto h-1/2 object-contain"
