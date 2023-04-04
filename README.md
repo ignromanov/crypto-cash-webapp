@@ -52,6 +52,10 @@ npm run dev
 
 The application should now be running on http://localhost:3000.
 
+### Support Me
+
+<a href="https://www.buymeacoffee.com/ignromanov" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## License
 
 This project is licensed under the MIT License.
