@@ -1,11 +1,27 @@
-import useMetamask from "@/hooks/useMetamask";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { Props } from "./Header.types";
 import Image from "next/image";
+import {
+  ConnectWallet,
+  useAddress,
+  useNetworkMismatch,
+  useSwitchChain,
+} from "@thirdweb-dev/react";
+
+const activeChain = parseInt(process.env.NEXT_PUBLIC_ACTIVE_CHAIN || "1");
 
 const Header: React.FC<Props> = ({ projectName }) => {
-  const { account } = useMetamask();
+  const address = useAddress(); // Get connected wallet address
+  const switchChain = useSwitchChain(); // Switch to desired chain
+  const isMismatched = useNetworkMismatch(); // Detect if user is connected to the wrong network
+
+  useEffect(() => {
+    // Check if the user is connected to the wrong network
+    if (isMismatched) {
+      switchChain(activeChain); // the chain you want here
+    }
+  }, [address, isMismatched, switchChain]); // This above block gets run every time "address" changes (e.g. when the user connects)
 
   return (
     <header className="bg-white border-b border-gray-200 py-4">
@@ -19,14 +35,7 @@ const Header: React.FC<Props> = ({ projectName }) => {
             width={100}
           />
         </Link>
-        <div className="text-lg font-medium">
-          <span className="text-sm mr-2">Connected account:</span>
-          <span className="text-xs bg-cryptocash-secondary rounded-md px-2 py-1 text-cryptocash-tetriary">
-            {account
-              ? `${account.slice(0, 6)}...${account.slice(-4)}`
-              : "Not Connected"}
-          </span>
-        </div>
+        <ConnectWallet theme={"light"} />
       </div>
     </header>
   );

@@ -5,30 +5,37 @@ import {
   codesFactoryContractAddress,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
-import useMetamask from "./useMetamask";
 import { generateRandomNonce, calculateHash } from "@/utils/secretCodes";
 import axios from "axios";
 import { UpdateExecStatus } from "./useExecStatus.types";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import { handleApiError } from "@/utils/api";
+import { useAddress, useSigner } from "@thirdweb-dev/react";
 
 const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
-  const { signer, account } = useMetamask();
+  // TODO: waiting for Metamask ext fix
+  // const isMismatched = useNetworkMismatch();
+  const isMismatched = false;
+  const account = useAddress();
+  const signer = useSigner();
+
   const [codesFactoryContract, setCodesFactoryContract] =
     useState<CodesFactoryContractType | null>(null);
 
   useEffect(() => {
-    if (!signer) {
+    if (!signer || isMismatched) {
+      setCodesFactoryContract(null);
       return;
     }
 
-    const codesFactoryContract = new ethers.BaseContract(
-      codesFactoryContractAddress,
-      codesFactoryContractAbi,
-      signer
-    ) as unknown as CodesFactoryContractType;
+    const codesFactoryContract: CodesFactoryContractType =
+      new ethers.BaseContract(
+        codesFactoryContractAddress,
+        codesFactoryContractAbi,
+        signer
+      );
     setCodesFactoryContract(codesFactoryContract);
-  }, [signer]);
+  }, [signer, isMismatched]);
 
   const requestMerkleProof = useCallback(
     async (secretCode: string, merkleRootIndex: string) => {
@@ -128,9 +135,6 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
         const redeemTx = await codesFactoryContract.revealCode(
           merkleRootIndex,
           secretCode,
-          // TODO: waiting for ethers v6 supporting
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           amount,
           BigInt(storedNonce),
           merkleProof

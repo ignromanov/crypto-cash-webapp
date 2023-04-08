@@ -5,22 +5,21 @@ import {
 import { getMessageToSign } from "@/utils/secretCodes";
 import axios from "axios";
 import { useCallback } from "react";
-import useMetamask from "./useMetamask";
 import { UpdateExecStatus } from "./useExecStatus.types";
 import { ResponseError } from "@/types/api";
-import { formatEther } from "ethers";
 import { handleApiError } from "@/utils/api";
+import { useSigner } from "@thirdweb-dev/react";
+import { formatEther } from "ethers/lib/utils";
 
 const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
-  const { provider } = useMetamask();
+  const signer = useSigner();
 
   const sendRequest = useCallback(
     async (amount: bigint, numberOfCodes: string) => {
       const signMessage = async (message: string) => {
-        if (!provider) {
+        if (!signer) {
           return "";
         }
-        const signer = await provider.getSigner();
         const signature = await signer.signMessage(message);
         return signature;
       };
@@ -42,9 +41,6 @@ const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
         const response = await axios.post<ApiGenerateCodesResponseData>(
           "/api/generate-codes",
           {
-            // TODO: waiting for ethers v6 supporting
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             amount: formatEther(amount),
             numberOfCodes,
             signature,
@@ -71,7 +67,7 @@ const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
         });
       }
     },
-    [provider, updateExecStatus]
+    [signer, updateExecStatus]
   );
 
   return { sendRequest };
