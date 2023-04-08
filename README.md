@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://i.imgur.com/kizvtYy.png" alt="CryptoCash Logo" width="200px">
+</p>
+
 # CryptoCash Web Application
 
 CryptoCash is a blockchain-based payment solution designed for developing countries, leveraging token-based transactions with secret codes. The application interacts with the CryptoCash smart contracts deployed on the Polygon Mumbai blockchain. This web application is built using Next.js and serves as the front-end for the CryptoCash project.
