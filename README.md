@@ -1,6 +1,6 @@
 # CryptoCash Web Application
 
-CryptoCash is a token-based system that allows users to generate and redeem secret codes for acquiring tokens. The application interacts with the CryptoCash smart contracts deployed on the Ethereum blockchain. This web application is built using Next.js and serves as the front-end for the CryptoCash project. Only the administrator (contract owner) can generate codes.
+CryptoCash is a token-based system that allows users to generate and redeem secret codes for acquiring tokens. The application interacts with the CryptoCash smart contracts deployed on the Polygon Mumbai blockchain. This web application is built using Next.js and serves as the front-end for the CryptoCash project. Only the administrator (contract owner) can generate codes.
 
 [Smart Contracts Repository](https://github.com/ignromanov/crypto-cash-contracts)
 
