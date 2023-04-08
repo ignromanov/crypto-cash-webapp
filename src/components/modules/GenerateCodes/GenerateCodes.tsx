@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import useExecStatus from "@/hooks/useExecStatus";
 import { Card } from "@/components/layouts/Card";
-import { parseEther } from "ethers";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import useGenerateCodesApi from "@/hooks/useGenerateCodesApi";
+import { parseEther } from "ethers/lib/utils";
 
 const GenerateCodes: React.FC = () => {
   const [numberOfCodes, setNumberOfCodes] = useState("");
@@ -24,6 +24,8 @@ const GenerateCodes: React.FC = () => {
     }
 
     clearExecStatus();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     await sendRequest(parseEther(amount), numberOfCodes);
   };
 

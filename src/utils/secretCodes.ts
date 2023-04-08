@@ -1,14 +1,13 @@
 import { Keccak256Hash } from "@/types/codes";
+import { BytesLike } from "ethers";
 import {
-  AbiCoder,
-  BytesLike,
-  concat,
-  hexlify,
-  keccak256,
-  randomBytes,
   verifyMessage,
-} from "ethers";
-import { DataHexString } from "ethers/types/utils/data";
+  hexlify,
+  randomBytes,
+  keccak256,
+  concat,
+  defaultAbiCoder,
+} from "ethers/lib/utils";
 
 function getMessageToSign(
   amount: bigint,
@@ -24,11 +23,11 @@ async function verifySignature(message: string, signature: string) {
   return recoveredAddress === contractOwner;
 }
 
-function generateSecretCodes(count: number): DataHexString[] {
+function generateSecretCodes(count: number): string[] {
   const codes: string[] = [];
 
   for (let i = 0; i < count; i++) {
-    const code: DataHexString = hexlify(randomBytes(32));
+    const code: string = hexlify(randomBytes(32));
     codes.push(code);
   }
 
@@ -43,8 +42,10 @@ function generateRandomNonce(): bigint {
 }
 
 function calculateHash(code: BytesLike, number: bigint): Keccak256Hash {
-  const abiCoder = AbiCoder.defaultAbiCoder();
-  const encoded = abiCoder.encode(["bytes32", "uint256"], [code, number]);
+  const encoded = defaultAbiCoder.encode(
+    ["bytes32", "uint256"],
+    [code, number]
+  );
   const keccak256Encoded = keccak256(encoded);
   return keccak256(concat([keccak256Encoded])) as Keccak256Hash;
 }

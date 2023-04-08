@@ -3,13 +3,13 @@ import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
 import connectToDatabase from "@/utils/mongoose";
 import { loadMerkleTree } from "@/utils/merkleTree";
-import { formatEther, parseEther } from "ethers";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import {
   ApiGetCodesResponseData,
   GetCodesResponseData,
 } from "@/components/modules/DisplayCodes";
 import { stringifyCodeData } from "@/utils/convertCodeData";
+import { parseEther, formatEther } from "ethers/lib/utils";
 
 async function getCodes(
   req: NextApiRequest,
@@ -43,6 +43,8 @@ async function getCodes(
         ]) as Keccak256Hash;
         const codeData: CodeData = {
           secretCode,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           amount,
           merkleRootIndex: codesTree.merkleRootIndex,
           leafHash,

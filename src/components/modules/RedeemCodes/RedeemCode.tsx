@@ -4,11 +4,11 @@ import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { generateQrCodeImage } from "@/utils/qrCode";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
-import { formatEther } from "ethers";
 import { Badge } from "@/components/elements/Badge";
 import { CodeData } from "@/types/codes";
 import { parseCodeData } from "@/utils/convertCodeData";
 import Image from "next/image";
+import { formatEther } from "ethers/lib/utils";
 
 const RedeemCode: React.FC = () => {
   const [dataToRedeem, setDataToRedeem] = useState<CodeData | null>(null);
@@ -87,6 +87,9 @@ const RedeemCode: React.FC = () => {
           <Image
             src={qrCodeImage}
             alt={`QR Code`}
+            width="0"
+            height="0"
+            sizes="100vw"
             className="w-auto h-1/2 object-contain"
           />
         ) : (
@@ -98,9 +101,6 @@ const RedeemCode: React.FC = () => {
       {dataToRedeem && (
         <div className="mb-4 flex items-center justify-center space-x-4 ">
           <Badge
-            // TODO: waiting for ethers v6 supporting
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
             caption={`Amount: ${formatEther(dataToRedeem.amount)}`}
             status={null}
           />

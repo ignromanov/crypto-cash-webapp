@@ -1,5 +1,5 @@
 import { CodeData } from "@/types/codes";
-import { formatEther, parseEther } from "ethers";
+import { formatEther, parseEther } from "ethers/lib/utils";
 
 const stringifyBigIntValue = (_: string, value: unknown) =>
   typeof value === "bigint" ? `BIGINT::${formatEther(value)}` : value;

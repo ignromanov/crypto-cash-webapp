@@ -113,6 +113,9 @@ const DisplayCodes: React.FC = () => {
           <Image
             src={qrCodeImage}
             alt={`QR Code ${index + 1}`}
+            width="0"
+            height="0"
+            sizes="100vw"
             className="w-full h-auto"
           />
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

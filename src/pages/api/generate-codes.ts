@@ -8,7 +8,7 @@ import {
   verifySignature,
 } from "@/utils/secretCodes";
 import connectToDatabase from "@/utils/mongoose";
-import { ethers, JsonRpcProvider, parseEther } from "ethers";
+import { ethers } from "ethers";
 import {
   codesFactoryContractAddress,
   codesFactoryContractAbi,
@@ -19,6 +19,8 @@ import {
   ApiGenerateCodesResponseData,
   GenerateCodesRequestBody,
 } from "@/components/modules/GenerateCodes";
+import { parseEther } from "ethers/lib/utils";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);
@@ -27,11 +29,12 @@ function getCodesFactoryContract() {
     provider
   );
 
-  const codesFactoryContractWrite = new ethers.BaseContract(
-    codesFactoryContractAddress,
-    codesFactoryContractAbi,
-    signer
-  ) as unknown as CodesFactoryContractType;
+  const codesFactoryContractWrite: CodesFactoryContractType =
+    new ethers.BaseContract(
+      codesFactoryContractAddress,
+      codesFactoryContractAbi,
+      signer
+    );
 
   return codesFactoryContractWrite;
 }
@@ -69,6 +72,8 @@ async function generateCodes(
 
   // Create the message to verify
   const amount = parseEther(amountStr);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const message = getMessageToSign(amount, numberOfCodes, timestamp);
 
   // Verify the signature
@@ -81,6 +86,8 @@ async function generateCodes(
 
   // Generate secret codes and Merkle tree
   const secretCodes = generateSecretCodes(parseInt(numberOfCodes));
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const merkleTree = generateMerkleTree(secretCodes, amount);
   const merkleDump = JSON.stringify(merkleTree.dump(), stringifyBigIntValue);
 
@@ -109,11 +116,7 @@ async function generateCodes(
       return;
     }
 
-    // Get the Merkle tree index from the transaction event
-    // TODO: waiting for ethers v6 supporting
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    codesTreeToInsert.merkleRootIndex = Number(txReceipt.logs[1].args[0]);
+    codesTreeToInsert.merkleRootIndex = String(txReceipt.events[1].args[0]);
 
     // Save the Merkle tree root and codes in the database
     const insertedCodesTree = await CodesTreeModel.create(codesTreeToInsert);
