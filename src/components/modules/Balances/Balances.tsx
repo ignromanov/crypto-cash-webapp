@@ -80,12 +80,14 @@ const Balances: React.FC = () => {
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-4">Welcome</h2>
         <p className="text-base mb-6">
-          Welcome to the CryptoCash Platform, a secure and innovative solution
-          for generating and redeeming token-based codes. Our platform empowers
-          users to create secret codes tied to specific amounts of tokens,
-          providing a seamless and user-friendly experience. Explore our
-          easy-to-use interface and discover the power of secure code generation
-          and redemption on the blockchain.
+          Welcome to the CryptoCash Platform, a blockchain-based payment
+          solution designed for developing countries, leveraging token-based
+          transactions with secret codes. Our platform empowers users to create
+          and redeem secret codes tied to specific amounts of tokens, providing
+          a seamless, secure, and user-friendly experience. Explore our
+          easy-to-use interface and discover the power of fast and affordable
+          transactions using QR codes and secure code generation and redemption
+          on the blockchain.
         </p>
       </div>
       <div className="p-4 bg-gray-100 rounded-t-md">
