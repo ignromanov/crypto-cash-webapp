@@ -7,7 +7,7 @@ import {
   getMessageToSign,
   verifySignature,
 } from "@/utils/secretCodes";
-import connectToDatabase from "@/utils/mongoose";
+import connectToDatabase from "@/services/mongoose";
 import { ethers } from "ethers";
 import {
   codesFactoryContractAddress,
@@ -21,7 +21,7 @@ import {
 } from "@/components/modules/GenerateCodes";
 import { parseEther } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { pinMerkleTreeToPinata } from "@/utils/pinata";
+import { pinMerkleTreeToPinata } from "@/services/pinata";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);

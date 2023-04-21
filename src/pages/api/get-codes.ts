@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
-import connectToDatabase from "@/utils/mongoose";
+import connectToDatabase from "@/services/mongoose";
 import { loadMerkleTree } from "@/utils/merkleTree";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import {

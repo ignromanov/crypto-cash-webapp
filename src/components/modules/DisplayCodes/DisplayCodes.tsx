@@ -7,7 +7,7 @@ import { Badge } from "@/components/elements/Badge";
 import { Keccak256Hash } from "@/types/codes";
 import { stringifyCodeData } from "@/utils/convertCodeData";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
-import useGetCodesApi from "@/hooks/useGetCodesApi";
+import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
 import Image from "next/image";
 
 const DisplayCodes: React.FC = () => {
@@ -20,7 +20,8 @@ const DisplayCodes: React.FC = () => {
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const { filterRedeemedLeaves, fetchMerkleRoots } =
     useCodesFactoryContract(updateExecStatus);
-  const { codesData, amount, requestCodes } = useGetCodesApi(updateExecStatus);
+  const { codesData, amount, sendRequest } =
+    useGetSecretCodesApi(updateExecStatus);
 
   useEffect(() => {
     const fetch = async () => {
@@ -54,7 +55,7 @@ const DisplayCodes: React.FC = () => {
       setQrCodesImages([]);
       clearExecStatus();
 
-      const { codesDataStr, codesData } = await requestCodes(
+      const { codesDataStr, codesData } = await sendRequest(
         merkleRootCode,
         includeProof
       );
@@ -70,7 +71,7 @@ const DisplayCodes: React.FC = () => {
     [
       merkleRootCode,
       clearExecStatus,
-      requestCodes,
+      sendRequest,
       includeProof,
       filterRedeemedLeaves,
       updateExecStatus,

@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import { Layout } from "@/components/layouts/Layout";
+import { MainLayout } from "@/components/layouts/MainLayout";
 import { ThirdwebProvider } from "@thirdweb-dev/react";
 
 import type { AppProps } from "next/app";
@@ -11,9 +11,9 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <ThirdwebProvider activeChain={activeChain}>
-      <Layout projectName={projectName}>
+      <MainLayout projectName={projectName}>
         <Component {...pageProps} />
-      </Layout>
+      </MainLayout>
     </ThirdwebProvider>
   );
 }
