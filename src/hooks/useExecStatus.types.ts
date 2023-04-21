@@ -1,7 +1,7 @@
 interface ExecStatus {
   pending: boolean;
   success: boolean | null;
-  message: string;
+  message: string | JSX.Element;
 }
 
 type UpdateExecStatus = (status: Partial<ExecStatus>) => void;

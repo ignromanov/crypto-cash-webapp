@@ -10,6 +10,8 @@ import { ResponseError } from "@/types/api";
 import { handleApiError } from "@/utils/api";
 import { useSigner } from "@thirdweb-dev/react";
 import { formatEther } from "ethers/lib/utils";
+import Link from "next/link";
+import { ipfsGatewayUrl } from "@/constants";
 
 const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
   const signer = useSigner();
@@ -53,10 +55,21 @@ const useGenerateCodesApi = (updateExecStatus: UpdateExecStatus) => {
         }
         const responseData = response.data as GenerateCodesResponseData;
 
+        const statusMessage = (
+          <span>
+            Secret codes generated successfully with Merkle Root Index: [
+            {responseData.merkleRootIndex}] and
+            <br />
+            Merkle Tree IPFS CID:{" "}
+            <Link href={ipfsGatewayUrl + responseData.ipfsCid}>
+              {responseData.ipfsCid}
+            </Link>
+          </span>
+        );
         updateExecStatus({
           pending: false,
           success: true,
-          message: `Secret codes generated successfully with RootIndex: ${responseData.merkleRootIndex}!`,
+          message: statusMessage,
         });
       } catch (error) {
         const errorMessage = handleApiError(error);

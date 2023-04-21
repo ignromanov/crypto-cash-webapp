@@ -21,6 +21,7 @@ import {
 } from "@/components/modules/GenerateCodes";
 import { parseEther } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { pinMerkleTreeToPinata } from "@/utils/pinata";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);
@@ -118,11 +119,15 @@ async function generateCodes(
 
     codesTreeToInsert.merkleRootIndex = String(txReceipt.events[1].args[0]);
 
+    const merkleDumpIpfsCid = await pinMerkleTreeToPinata(codesTreeToInsert);
+    codesTreeToInsert.ipfsCid = merkleDumpIpfsCid;
+
     // Save the Merkle tree root and codes in the database
     const insertedCodesTree = await CodesTreeModel.create(codesTreeToInsert);
-    res
-      .status(201)
-      .json({ merkleRootIndex: insertedCodesTree.merkleRootIndex });
+    res.status(201).json({
+      merkleRootIndex: insertedCodesTree.merkleRootIndex,
+      ipfsCid: insertedCodesTree.ipfsCid,
+    });
   } catch (error) {
     res
       .status(500)
