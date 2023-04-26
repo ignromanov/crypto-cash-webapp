@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import useExecStatus from "@/hooks/useExecStatus";
+import { Badge } from "@/components/elements/Badge";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Card } from "@/components/layouts/Card";
-import { generateQrCodeImage } from "@/utils/qrCode";
-import { Badge } from "@/components/elements/Badge";
+import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
+import useExecStatus from "@/hooks/useExecStatus";
+import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
 import { Keccak256Hash } from "@/types/codes";
 import { stringifyCodeData } from "@/utils/converters";
-import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
-import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
+import { generateQrCodeImage } from "@/utils/qrCode";
 import Image from "next/image";
+import React, { useCallback, useEffect, useState } from "react";
 
 const DisplayCodes: React.FC = () => {
   const [merkleRootCode, setMerkleRootCode] = useState("");

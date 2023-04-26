@@ -1,6 +1,6 @@
 import { ICodesTree } from "@/models/CodesTreeModel.types";
-import { Web3Storage } from "web3.storage";
 import { jsonToFilelike } from "@/utils/converters";
+import { Web3Storage } from "web3.storage";
 
 const web3StorageApiToken = process.env.WEB3_STORAGE_API_TOKEN;
 let web3StorageClient: Web3Storage | null = null;

@@ -1,7 +1,7 @@
+import { getSecretCodes } from "@/services/api";
 import { CodeData } from "@/types/codes";
 import { useCallback, useState } from "react";
 import { UpdateExecStatus } from "./useExecStatus.types";
-import { getSecretCodes } from "@/services/api";
 
 const useGetSecretCodesApi = (updateExecStatus: UpdateExecStatus) => {
   const [codesData, setCodesData] = useState<CodeData[]>([]);

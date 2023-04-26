@@ -1,8 +1,8 @@
-import React from "react";
 import { Header } from "@/components/layouts/Header";
 import { Sidebar } from "@/components/layouts/Sidebar";
-import { Props } from "./Layout.types";
 import Head from "next/head";
+import React from "react";
+import { Props } from "./Layout.types";
 
 const MainLayout: React.FC<Props> = ({ projectName, children }) => {
   return (

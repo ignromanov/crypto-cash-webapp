@@ -1,11 +1,11 @@
-import { Libp2p, createLibp2p } from "libp2p";
+import { ipfsGatewayUrl } from "@/constants";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { webTransport } from "@libp2p/webtransport";
 import { bootstrap } from "@libp2p/bootstrap";
 import { kadDHT } from "@libp2p/kad-dht";
+import { webTransport } from "@libp2p/webtransport";
 import axios from "axios";
-import { ipfsGatewayUrl } from "@/constants";
+import { Libp2p, createLibp2p } from "libp2p";
 
 let libp2pNode: Libp2p;
 

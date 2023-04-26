@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
 import { Switcher } from "@/components/elements/Switcher";
+import { useCallback, useState } from "react";
 import { Libp2pNodeSwitcherProps } from "./Libp2pNodeSwitcher.types";
 
 const Libp2pNodeSwitcher: React.FC<Libp2pNodeSwitcherProps> = ({

@@ -1,19 +1,19 @@
 import {
-  ApiGenerateCodesResponseData,
-  GenerateCodesResponseData,
-} from "@/components/modules/GenerateCodes";
-import axios from "axios";
-import { UpdateExecStatus } from "../hooks/useExecStatus.types";
-import { ResponseError } from "@/types/api";
-import { handleApiError } from "@/utils/api";
-import { formatEther } from "ethers/lib/utils";
-import Link from "next/link";
-import { ipfsGatewayUrl } from "@/constants";
-import {
   ApiGetCodesResponseData,
   GetCodesResponseData,
 } from "@/components/modules/DisplayCodes";
+import {
+  ApiGenerateCodesResponseData,
+  GenerateCodesResponseData,
+} from "@/components/modules/GenerateCodes";
+import { ipfsGatewayUrl } from "@/constants";
+import { ResponseError } from "@/types/api";
+import { handleApiError } from "@/utils/api";
 import { parseCodeData } from "@/utils/converters";
+import axios from "axios";
+import { formatEther } from "ethers/lib/utils";
+import Link from "next/link";
+import { UpdateExecStatus } from "../hooks/useExecStatus.types";
 
 const createSecretCodes = async (
   amount: bigint,

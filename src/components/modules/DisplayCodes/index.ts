@@ -1,5 +1,5 @@
 export { DisplayCodes } from "./DisplayCodes";
 export type {
-  GetCodesResponseData,
   ApiGetCodesResponseData,
+  GetCodesResponseData,
 } from "./DisplayCodes.types";

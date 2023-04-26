@@ -1,27 +1,27 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  ApiGenerateCodesResponseData,
+  GenerateCodesRequestBody,
+} from "@/components/modules/GenerateCodes";
+import {
+  CodesFactoryContractType,
+  codesFactoryContractAbi,
+  codesFactoryContractAddress,
+} from "@/contracts/codesFactory";
 import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
+import connectToDatabase from "@/services/mongoose";
+import { uploadMerkleTreeToWeb3Storage } from "@/services/web3.storage";
+import { stringifyBigIntValue } from "@/utils/converters";
 import { generateMerkleTree } from "@/utils/merkleTree";
 import {
   generateSecretCodes,
   getMessageToSign,
   verifySignature,
 } from "@/utils/secretCodes";
-import connectToDatabase from "@/services/mongoose";
-import { ethers } from "ethers";
-import {
-  codesFactoryContractAddress,
-  codesFactoryContractAbi,
-  CodesFactoryContractType,
-} from "@/contracts/codesFactory";
-import { stringifyBigIntValue } from "@/utils/converters";
-import {
-  ApiGenerateCodesResponseData,
-  GenerateCodesRequestBody,
-} from "@/components/modules/GenerateCodes";
-import { parseEther } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { uploadMerkleTreeToWeb3Storage } from "@/services/web3.storage";
+import { ethers } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);

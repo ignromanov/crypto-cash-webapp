@@ -1,7 +1,7 @@
-import React from "react";
-import Link from "next/link";
-import { links } from "./Sidebar.constants";
 import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { links } from "./Sidebar.constants";
 
 const Sidebar: React.FC = () => {
   return (

@@ -1,9 +1,9 @@
-import { useCallback } from "react";
-import { UpdateExecStatus } from "./useExecStatus.types";
-import { useSigner } from "@thirdweb-dev/react";
-import { createSecretCodes } from "../services/api";
-import { getMessageToSign } from "@/utils/secretCodes";
 import { signMessage } from "@/services/ethers";
+import { getMessageToSign } from "@/utils/secretCodes";
+import { useSigner } from "@thirdweb-dev/react";
+import { useCallback } from "react";
+import { createSecretCodes } from "../services/api";
+import { UpdateExecStatus } from "./useExecStatus.types";
 
 const useCreateSecretCodesApi = (updateExecStatus: UpdateExecStatus) => {
   const signer = useSigner();

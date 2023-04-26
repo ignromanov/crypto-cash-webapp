@@ -1,6 +1,6 @@
-import { Filelike } from "web3.storage";
 import { CodeData } from "@/types/codes";
 import { formatEther, parseEther } from "ethers/lib/utils";
+import { Filelike } from "web3.storage";
 import { JsonObject } from "./converters.types";
 
 const stringifyBigIntValue = (_: string, value: unknown) =>

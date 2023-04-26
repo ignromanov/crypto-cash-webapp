@@ -1,13 +1,13 @@
-import Link from "next/link";
-import React, { useEffect } from "react";
-import { Props } from "./Header.types";
-import Image from "next/image";
 import {
   ConnectWallet,
   useAddress,
   useNetworkMismatch,
   useSwitchChain,
 } from "@thirdweb-dev/react";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useEffect } from "react";
+import { Props } from "./Header.types";
 
 const activeChain = parseInt(process.env.NEXT_PUBLIC_ACTIVE_CHAIN || "1");
 

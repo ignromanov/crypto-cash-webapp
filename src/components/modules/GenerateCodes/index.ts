@@ -1,6 +1,6 @@
 export { GenerateCodes } from "./GenerateCodes";
 export type {
-  GenerateCodesRequestBody,
   ApiGenerateCodesResponseData,
+  GenerateCodesRequestBody,
   GenerateCodesResponseData,
 } from "./GenerateCodes.type";

@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { ethers } from "ethers";
 import {
+  CodesFactoryContractType,
   codesFactoryContractAbi,
   codesFactoryContractAddress,
-  CodesFactoryContractType,
 } from "@/contracts/codesFactory";
-import { generateRandomNonce, calculateHash } from "@/utils/secretCodes";
-import { UpdateExecStatus } from "./useExecStatus.types";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import { handleApiError } from "@/utils/api";
+import { calculateHash, generateRandomNonce } from "@/utils/secretCodes";
 import { useAddress, useSigner } from "@thirdweb-dev/react";
+import { ethers } from "ethers";
+import { useCallback, useEffect, useState } from "react";
+import { UpdateExecStatus } from "./useExecStatus.types";
 
 const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
   // TODO: waiting for Metamask ext fix
