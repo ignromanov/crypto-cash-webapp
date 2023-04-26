@@ -1,3 +1,3 @@
-const ipfsGatewayUrl = `https://gateway.pinata.cloud/ipfs/`;
+const ipfsGatewayUrl = "https://w3s.link/ipfs/";
 
 export { ipfsGatewayUrl };
