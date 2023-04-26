@@ -5,10 +5,11 @@ type HashBrand = {
 type Keccak256Hash = string & HashBrand;
 
 interface CodeData {
-  secretCode: string;
+  rootIndex: string;
+  code: string;
   amount: bigint;
-  merkleRootIndex: string;
-  leafHash: Keccak256Hash;
+  cid: string;
+  leaf: Keccak256Hash;
   merkleProof?: Keccak256Hash[];
 }
 

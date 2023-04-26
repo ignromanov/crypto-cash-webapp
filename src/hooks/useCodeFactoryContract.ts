@@ -6,7 +6,6 @@ import {
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
 import { generateRandomNonce, calculateHash } from "@/utils/secretCodes";
-import axios from "axios";
 import { UpdateExecStatus } from "./useExecStatus.types";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import { handleApiError } from "@/utils/api";
@@ -37,19 +36,6 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
     setCodesFactoryContract(codesFactoryContract);
   }, [signer, isMismatched]);
 
-  const requestMerkleProof = useCallback(
-    async (secretCode: string, merkleRootIndex: string) => {
-      const response = await axios.get("/api/get-merkle-proof", {
-        params: { secretCode, merkleRootIndex },
-      });
-
-      if (response.status === 200) {
-        return response.data.merkleProof;
-      }
-    },
-    []
-  );
-
   const handleCommit = useCallback(
     async (dataToRedeem: CodeData | null): Promise<boolean> => {
       if (!dataToRedeem || !codesFactoryContract) {
@@ -62,14 +48,11 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
       });
 
       try {
-        const { secretCode, amount } = dataToRedeem;
+        const { code, amount } = dataToRedeem;
 
         const nonce = generateRandomNonce();
-        const commitment = calculateHash(secretCode, nonce);
-        const storageKey = `commitment_nonce_${calculateHash(
-          secretCode,
-          amount
-        )}`;
+        const commitment = calculateHash(code, nonce);
+        const storageKey = `commitment_nonce_${calculateHash(code, amount)}`;
         localStorage.setItem(storageKey, nonce.toString());
 
         // send commit transaction
@@ -112,12 +95,12 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
       });
 
       try {
-        const { secretCode, merkleRootIndex, amount } = dataToRedeem;
-        let { merkleProof } = dataToRedeem;
+        const { code, rootIndex, amount, merkleProof } = dataToRedeem;
+        if (!merkleProof) throw new Error("Merkle proof not found.");
 
         // get commitment nonce
         const nonceStorageKey = `commitment_nonce_${calculateHash(
-          secretCode,
+          code,
           amount
         )}`;
         const storedNonce = localStorage.getItem(nonceStorageKey);
@@ -125,16 +108,10 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
           throw new Error("Nonce not found. Please commit the code first.");
         }
 
-        // request Merkle proof from the server if not provided
-        if (!merkleProof) {
-          merkleProof = await requestMerkleProof(secretCode, merkleRootIndex);
-          if (!merkleProof) throw new Error("Merkle proof not found.");
-        }
-
         // call the redeemCode function on the contract
         const redeemTx = await codesFactoryContract.revealCode(
-          merkleRootIndex,
-          secretCode,
+          rootIndex,
+          code,
           amount,
           BigInt(storedNonce),
           merkleProof
@@ -164,7 +141,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
       });
       return true;
     },
-    [codesFactoryContract, requestMerkleProof, updateExecStatus]
+    [codesFactoryContract, updateExecStatus]
   );
 
   const filterRedeemedLeaves = useCallback(
@@ -191,7 +168,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
 
       const commitedCodes = codesData.filter((code) => {
         const nonceStorageKey = `commitment_nonce_${calculateHash(
-          code.secretCode,
+          code.code,
           code.amount
         )}`;
 

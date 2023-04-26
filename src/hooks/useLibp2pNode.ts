@@ -1,7 +1,7 @@
 import {
-  libp2pNode,
   createLibp2pNode,
   getFileFromIPFS,
+  libp2pNode,
 } from "@/services/libp2p";
 import { CodeData } from "@/types/codes";
 import { loadMerkleTree } from "@/utils/merkleTree";
@@ -10,12 +10,12 @@ import { UpdateExecStatus } from "./useExecStatus.types";
 
 const useLibp2pNode = (updateExecStatus: UpdateExecStatus) => {
   useEffect(() => {
-    const startNode = async () => {
+    const createNode = async () => {
       if (libp2pNode) return;
       await createLibp2pNode();
     };
 
-    startNode();
+    createNode();
 
     return () => {
       libp2pNode?.stop();

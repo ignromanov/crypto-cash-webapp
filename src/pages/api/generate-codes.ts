@@ -14,14 +14,14 @@ import {
   codesFactoryContractAbi,
   CodesFactoryContractType,
 } from "@/contracts/codesFactory";
-import { stringifyBigIntValue } from "@/utils/convertCodeData";
+import { stringifyBigIntValue } from "@/utils/converters";
 import {
   ApiGenerateCodesResponseData,
   GenerateCodesRequestBody,
 } from "@/components/modules/GenerateCodes";
 import { parseEther } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { pinMerkleTreeToPinata } from "@/services/pinata";
+import { uploadMerkleTreeToWeb3Storage } from "@/services/web3.storage";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);
@@ -119,7 +119,9 @@ async function generateCodes(
 
     codesTreeToInsert.merkleRootIndex = String(txReceipt.events[1].args[0]);
 
-    const merkleDumpIpfsCid = await pinMerkleTreeToPinata(codesTreeToInsert);
+    const merkleDumpIpfsCid = await uploadMerkleTreeToWeb3Storage(
+      codesTreeToInsert
+    );
     codesTreeToInsert.ipfsCid = merkleDumpIpfsCid;
 
     // Save the Merkle tree root and codes in the database

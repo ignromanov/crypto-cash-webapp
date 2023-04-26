@@ -1,14 +1,16 @@
-import React, { useCallback, useState } from "react";
-import { Card } from "@/components/layouts/Card";
+import { Badge } from "@/components/elements/Badge";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
-import { generateQrCodeImage } from "@/utils/qrCode";
+import { Libp2pNodeSwitcher } from "@/components/elements/Libp2pNodeSwitcher";
+import { Card } from "@/components/layouts/Card";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
-import { Badge } from "@/components/elements/Badge";
-import { CodeData } from "@/types/codes";
-import { parseCodeData } from "@/utils/convertCodeData";
-import Image from "next/image";
+import { useLibp2pNode } from "@/hooks/useLibp2pNode";
+import { CodeData, Keccak256Hash } from "@/types/codes";
+import { parseCodeData } from "@/utils/converters";
+import { generateQrCodeImage } from "@/utils/qrCode";
 import { formatEther } from "ethers/lib/utils";
+import Image from "next/image";
+import React, { useCallback, useState } from "react";
 
 const RedeemCode: React.FC = () => {
   const [dataToRedeem, setDataToRedeem] = useState<CodeData | null>(null);
@@ -16,7 +18,9 @@ const RedeemCode: React.FC = () => {
   const [isCodeCommitted, setIsCodeCommitted] = useState(false);
   const [isCodeRevealed, setIsCodeRevealed] = useState(false);
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
+  const hasMerkleProof = !!dataToRedeem?.merkleProof;
 
+  const { libp2pNode, getMerkleProofByData } = useLibp2pNode(updateExecStatus);
   const {
     handleCommit,
     handleReveal,
@@ -52,9 +56,7 @@ const RedeemCode: React.FC = () => {
         const parsedData = parseCodeData(data);
         setDataToRedeem(parsedData);
 
-        const redeemedLeaves = await filterRedeemedLeaves([
-          parsedData.leafHash,
-        ]);
+        const redeemedLeaves = await filterRedeemedLeaves([parsedData.leaf]);
         const isCodeRedeemed = redeemedLeaves.length === 1;
 
         const commitedCodes = await filterCommitedCodes([parsedData]);
@@ -68,6 +70,18 @@ const RedeemCode: React.FC = () => {
     },
     [filterRedeemedLeaves, filterCommitedCodes]
   );
+
+  const handleRetrieveProof = useCallback(async () => {
+    if (!dataToRedeem) return;
+
+    const proof = await getMerkleProofByData(dataToRedeem);
+
+    const data: CodeData = {
+      ...dataToRedeem,
+      merkleProof: proof as Keccak256Hash[],
+    };
+    setDataToRedeem(data);
+  }, [dataToRedeem, getMerkleProofByData]);
 
   return (
     <Card>
@@ -105,6 +119,10 @@ const RedeemCode: React.FC = () => {
             status={null}
           />
           <Badge
+            caption={hasMerkleProof ? "Proofed" : "No Proof"}
+            status={hasMerkleProof}
+          />
+          <Badge
             caption={isCodeCommitted ? "Committed" : "Not Committed"}
             status={isCodeCommitted}
           />
@@ -114,17 +132,26 @@ const RedeemCode: React.FC = () => {
           />
         </div>
       )}
-
+      <div className="flex items-center justify-center">
+        <Libp2pNodeSwitcher libp2pNode={libp2pNode} />
+        <button
+          onClick={handleRetrieveProof}
+          disabled={!dataToRedeem || hasMerkleProof}
+        >
+          {"Retrieve Merkle Proof"}
+        </button>
+      </div>
       <button
+        className={"mt-4"}
         onClick={handleCommitWrapper}
-        disabled={!dataToRedeem || isCodeCommitted}
+        disabled={!dataToRedeem || isCodeCommitted || !hasMerkleProof}
       >
         Commit Code
       </button>
       <button
         className={"mt-4"}
         onClick={handleRevealWrapper}
-        disabled={!isCodeCommitted || isCodeRevealed}
+        disabled={!isCodeCommitted || isCodeRevealed || !hasMerkleProof}
       >
         Reveal Code
       </button>

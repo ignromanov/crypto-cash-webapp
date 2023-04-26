@@ -5,7 +5,7 @@ import { Card } from "@/components/layouts/Card";
 import { generateQrCodeImage } from "@/utils/qrCode";
 import { Badge } from "@/components/elements/Badge";
 import { Keccak256Hash } from "@/types/codes";
-import { stringifyCodeData } from "@/utils/convertCodeData";
+import { stringifyCodeData } from "@/utils/converters";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
 import Image from "next/image";
@@ -64,7 +64,7 @@ const DisplayCodes: React.FC = () => {
       setQrCodesImages(images);
 
       const redeemedLeaves = await filterRedeemedLeaves(
-        codesData.map(({ leafHash }) => leafHash)
+        codesData.map(({ leaf }) => leaf)
       );
       setRedeemedLeaves(redeemedLeaves);
     },
@@ -102,7 +102,7 @@ const DisplayCodes: React.FC = () => {
   );
 
   const renderQrCodeImage = (qrCodeImage: string, index: number) => {
-    const isCodeRedeemed = redeemedLeaves.includes(codesData[index].leafHash);
+    const isCodeRedeemed = redeemedLeaves.includes(codesData[index].leaf);
 
     return (
       <div

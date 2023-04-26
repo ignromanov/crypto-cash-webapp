@@ -13,7 +13,7 @@ import {
   ApiGetCodesResponseData,
   GetCodesResponseData,
 } from "@/components/modules/DisplayCodes";
-import { parseCodeData } from "@/utils/convertCodeData";
+import { parseCodeData } from "@/utils/converters";
 
 const createSecretCodes = async (
   amount: bigint,
