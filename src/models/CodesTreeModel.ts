@@ -11,6 +11,10 @@ const CodesTreeSchema = new Schema({
     required: true,
     default: -1,
   },
+  ipfsCid: {
+    type: String,
+    required: true,
+  },
   amount: {
     type: String,
     required: true,

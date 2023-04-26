@@ -1,10 +1,10 @@
-import React from "react";
 import { Header } from "@/components/layouts/Header";
 import { Sidebar } from "@/components/layouts/Sidebar";
-import { Props } from "./Layout.types";
 import Head from "next/head";
+import React from "react";
+import { Props } from "./Layout.types";
 
-const Layout: React.FC<Props> = ({ projectName, children }) => {
+const MainLayout: React.FC<Props> = ({ projectName, children }) => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Head>
@@ -21,4 +21,4 @@ const Layout: React.FC<Props> = ({ projectName, children }) => {
   );
 };
 
-export { Layout };
+export { MainLayout };

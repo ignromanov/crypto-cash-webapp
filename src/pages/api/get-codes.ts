@@ -1,15 +1,15 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import CodesTreeModel from "@/models/CodesTreeModel";
-import { ICodesTree } from "@/models/CodesTreeModel.types";
-import connectToDatabase from "@/utils/mongoose";
-import { loadMerkleTree } from "@/utils/merkleTree";
-import { CodeData, Keccak256Hash } from "@/types/codes";
 import {
   ApiGetCodesResponseData,
   GetCodesResponseData,
 } from "@/components/modules/DisplayCodes";
-import { stringifyCodeData } from "@/utils/convertCodeData";
-import { parseEther, formatEther } from "ethers/lib/utils";
+import CodesTreeModel from "@/models/CodesTreeModel";
+import { ICodesTree } from "@/models/CodesTreeModel.types";
+import connectToDatabase from "@/services/mongoose";
+import { CodeData, Keccak256Hash } from "@/types/codes";
+import { stringifyCodeData } from "@/utils/converters";
+import { loadMerkleTree } from "@/utils/merkleTree";
+import { formatEther, parseEther } from "ethers/lib/utils";
+import { NextApiRequest, NextApiResponse } from "next";
 
 async function getCodes(
   req: NextApiRequest,
@@ -34,20 +34,19 @@ async function getCodes(
   if (codesTree) {
     const merkleTree = loadMerkleTree(codesTree.merkleDump);
     const amount = parseEther(codesTree.amount);
+    const cid = codesTree.ipfsCid;
 
     const codesData = await Promise.all(
-      codesTree.secretCodes.map(async (secretCode, index) => {
-        const leafHash = merkleTree.leafHash([
-          secretCode,
-          amount,
-        ]) as Keccak256Hash;
+      codesTree.secretCodes.map(async (code, index) => {
+        const leaf = merkleTree.leafHash([code, amount]) as Keccak256Hash;
         const codeData: CodeData = {
-          secretCode,
+          rootIndex: codesTree.merkleRootIndex,
+          code,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           amount,
-          merkleRootIndex: codesTree.merkleRootIndex,
-          leafHash,
+          leaf,
+          cid,
         };
 
         if (withProof) {

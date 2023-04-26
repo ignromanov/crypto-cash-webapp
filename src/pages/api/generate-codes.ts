@@ -1,26 +1,27 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  ApiGenerateCodesResponseData,
+  GenerateCodesRequestBody,
+} from "@/components/modules/GenerateCodes";
+import {
+  CodesFactoryContractType,
+  codesFactoryContractAbi,
+  codesFactoryContractAddress,
+} from "@/contracts/codesFactory";
 import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
+import connectToDatabase from "@/services/mongoose";
+import { uploadMerkleTreeToWeb3Storage } from "@/services/web3.storage";
+import { stringifyBigIntValue } from "@/utils/converters";
 import { generateMerkleTree } from "@/utils/merkleTree";
 import {
   generateSecretCodes,
   getMessageToSign,
   verifySignature,
 } from "@/utils/secretCodes";
-import connectToDatabase from "@/utils/mongoose";
-import { ethers } from "ethers";
-import {
-  codesFactoryContractAddress,
-  codesFactoryContractAbi,
-  CodesFactoryContractType,
-} from "@/contracts/codesFactory";
-import { stringifyBigIntValue } from "@/utils/convertCodeData";
-import {
-  ApiGenerateCodesResponseData,
-  GenerateCodesRequestBody,
-} from "@/components/modules/GenerateCodes";
-import { parseEther } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { ethers } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 function getCodesFactoryContract() {
   const provider = new JsonRpcProvider(process.env.RPC_URL);
@@ -118,11 +119,17 @@ async function generateCodes(
 
     codesTreeToInsert.merkleRootIndex = String(txReceipt.events[1].args[0]);
 
+    const merkleDumpIpfsCid = await uploadMerkleTreeToWeb3Storage(
+      codesTreeToInsert
+    );
+    codesTreeToInsert.ipfsCid = merkleDumpIpfsCid;
+
     // Save the Merkle tree root and codes in the database
     const insertedCodesTree = await CodesTreeModel.create(codesTreeToInsert);
-    res
-      .status(201)
-      .json({ merkleRootIndex: insertedCodesTree.merkleRootIndex });
+    res.status(201).json({
+      merkleRootIndex: insertedCodesTree.merkleRootIndex,
+      ipfsCid: insertedCodesTree.ipfsCid,
+    });
   } catch (error) {
     res
       .status(500)

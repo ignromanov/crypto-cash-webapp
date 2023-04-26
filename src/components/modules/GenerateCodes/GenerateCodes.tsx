@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import useExecStatus from "@/hooks/useExecStatus";
-import { Card } from "@/components/layouts/Card";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
-import useGenerateCodesApi from "@/hooks/useGenerateCodesApi";
+import { Card } from "@/components/layouts/Card";
+import useCreateSecretCodesApi from "@/hooks/useCreateSecretCodesApi";
+import useExecStatus from "@/hooks/useExecStatus";
 import { parseEther } from "ethers/lib/utils";
+import React, { useState } from "react";
 
 const GenerateCodes: React.FC = () => {
   const [numberOfCodes, setNumberOfCodes] = useState("");
   const [amount, setAmount] = useState<string>("");
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
 
-  const { sendRequest } = useGenerateCodesApi(updateExecStatus);
+  const { sendRequest } = useCreateSecretCodesApi(updateExecStatus);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

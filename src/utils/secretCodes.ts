@@ -1,12 +1,12 @@
 import { Keccak256Hash } from "@/types/codes";
 import { BytesLike } from "ethers";
 import {
-  verifyMessage,
-  hexlify,
-  randomBytes,
-  keccak256,
   concat,
   defaultAbiCoder,
+  hexlify,
+  keccak256,
+  randomBytes,
+  verifyMessage,
 } from "ethers/lib/utils";
 
 function getMessageToSign(

@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import useExecStatus from "@/hooks/useExecStatus";
+import { Badge } from "@/components/elements/Badge";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Card } from "@/components/layouts/Card";
-import { generateQrCodeImage } from "@/utils/qrCode";
-import { Badge } from "@/components/elements/Badge";
-import { Keccak256Hash } from "@/types/codes";
-import { stringifyCodeData } from "@/utils/convertCodeData";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
-import useGetCodesApi from "@/hooks/useGetCodesApi";
+import useExecStatus from "@/hooks/useExecStatus";
+import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
+import { Keccak256Hash } from "@/types/codes";
+import { stringifyCodeData } from "@/utils/converters";
+import { generateQrCodeImage } from "@/utils/qrCode";
 import Image from "next/image";
+import React, { useCallback, useEffect, useState } from "react";
 
 const DisplayCodes: React.FC = () => {
   const [merkleRootCode, setMerkleRootCode] = useState("");
@@ -20,7 +20,8 @@ const DisplayCodes: React.FC = () => {
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const { filterRedeemedLeaves, fetchMerkleRoots } =
     useCodesFactoryContract(updateExecStatus);
-  const { codesData, amount, requestCodes } = useGetCodesApi(updateExecStatus);
+  const { codesData, amount, sendRequest } =
+    useGetSecretCodesApi(updateExecStatus);
 
   useEffect(() => {
     const fetch = async () => {
@@ -54,7 +55,7 @@ const DisplayCodes: React.FC = () => {
       setQrCodesImages([]);
       clearExecStatus();
 
-      const { codesDataStr, codesData } = await requestCodes(
+      const { codesDataStr, codesData } = await sendRequest(
         merkleRootCode,
         includeProof
       );
@@ -63,14 +64,14 @@ const DisplayCodes: React.FC = () => {
       setQrCodesImages(images);
 
       const redeemedLeaves = await filterRedeemedLeaves(
-        codesData.map(({ leafHash }) => leafHash)
+        codesData.map(({ leaf }) => leaf)
       );
       setRedeemedLeaves(redeemedLeaves);
     },
     [
       merkleRootCode,
       clearExecStatus,
-      requestCodes,
+      sendRequest,
       includeProof,
       filterRedeemedLeaves,
       updateExecStatus,
@@ -101,7 +102,7 @@ const DisplayCodes: React.FC = () => {
   );
 
   const renderQrCodeImage = (qrCodeImage: string, index: number) => {
-    const isCodeRedeemed = redeemedLeaves.includes(codesData[index].leafHash);
+    const isCodeRedeemed = redeemedLeaves.includes(codesData[index].leaf);
 
     return (
       <div

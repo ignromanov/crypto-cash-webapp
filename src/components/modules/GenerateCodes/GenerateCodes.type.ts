@@ -9,6 +9,7 @@ type GenerateCodesRequestBody = {
 
 type GenerateCodesResponseData = {
   merkleRootIndex: string;
+  ipfsCid: string;
 };
 
 type ApiGenerateCodesResponseData = GenerateCodesResponseData | ResponseError;
