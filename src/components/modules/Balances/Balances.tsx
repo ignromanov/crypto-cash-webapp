@@ -102,16 +102,18 @@ const Balances: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-4">Merkle Roots</h2>
-        <ul className="list-disc list-inside">
-          {merkleRoots.map((root, index) => (
-            <li key={index} className="text-base my-1">
-              <span className="font-medium">{index}:</span> {root}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {merkleRoots.length > 0 && (
+        <div className="p-4">
+          <h2 className="text-2xl font-semibold mb-4">Merkle Roots</h2>
+          <ul className="list-disc list-inside">
+            {merkleRoots.map((root, index) => (
+              <li key={index} className="text-base my-1">
+                <span className="font-medium">{index}:</span> {root}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Card>
   );
 };
