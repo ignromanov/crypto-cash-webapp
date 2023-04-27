@@ -1,0 +1,1 @@
+export { QrCodeImage } from "./QrCodeImage";
