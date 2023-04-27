@@ -1,4 +1,3 @@
-import { ICodesTree } from "@/models/CodesTreeModel.types";
 import { jsonToFilelike } from "@/utils/converters";
 import { Web3Storage } from "web3.storage";
 
@@ -6,15 +5,14 @@ const web3StorageApiToken = process.env.WEB3_STORAGE_API_TOKEN;
 let web3StorageClient: Web3Storage | null = null;
 
 const getWeb3StorageClient = () => {
-  if (web3StorageClient) {
-    return web3StorageClient;
+  if (!web3StorageClient && web3StorageApiToken) {
+    web3StorageClient = new Web3Storage({ token: web3StorageApiToken });
   }
 
-  if (!web3StorageApiToken) {
+  if (!web3StorageClient) {
     throw new Error("No API token found");
   }
 
-  web3StorageClient = new Web3Storage({ token: web3StorageApiToken });
   return web3StorageClient;
 };
 
@@ -33,21 +31,19 @@ const uploadToWeb3Storage = async (
   return cid;
 };
 
-const uploadMerkleTreeToWeb3Storage = async (
-  codesTreeToInsert: Partial<ICodesTree>
+const uploadMerkleLeavesToWeb3Storage = async (
+  merkleLeaves: string[],
+  merkleRootIndex: string
 ): Promise<string> => {
-  const { merkleRoot, merkleRootIndex, merkleDump } = codesTreeToInsert;
-  const fileName = merkleRoot + ".json";
-  const pinName =
-    "CSH Tree [" +
-    merkleRootIndex +
-    "] " +
-    merkleRoot?.substring(0, 7) +
-    "..." +
-    merkleRoot?.substring(merkleRoot.length - 5);
+  if (merkleLeaves.length === 0) throw new Error("No leaves found");
+
+  const merkleRoot = merkleLeaves[0];
+  const fileName = `${merkleRoot}.json`;
+  const pinName = `CSH Tree [${merkleRootIndex}] 
+    ${merkleRoot.slice(0, 7)}...${merkleRoot.slice(-5)}`;
 
   const merkleTreeCid = await uploadToWeb3Storage(
-    merkleDump || "",
+    JSON.stringify(merkleLeaves),
     fileName,
     pinName
   );
@@ -55,4 +51,4 @@ const uploadMerkleTreeToWeb3Storage = async (
   return merkleTreeCid;
 };
 
-export { uploadMerkleTreeToWeb3Storage };
+export { uploadMerkleLeavesToWeb3Storage };

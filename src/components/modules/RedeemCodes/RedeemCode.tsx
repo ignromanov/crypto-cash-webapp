@@ -20,7 +20,8 @@ const RedeemCode: React.FC = () => {
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const hasMerkleProof = !!dataToRedeem?.merkleProof;
 
-  const { libp2pNode, getMerkleProofByData } = useLibp2pNode(updateExecStatus);
+  const { libp2pNode, getMerkleProofByCodeData } =
+    useLibp2pNode(updateExecStatus);
   const {
     handleCommit,
     handleReveal,
@@ -74,14 +75,14 @@ const RedeemCode: React.FC = () => {
   const handleRetrieveProof = useCallback(async () => {
     if (!dataToRedeem) return;
 
-    const proof = await getMerkleProofByData(dataToRedeem);
+    const proof = await getMerkleProofByCodeData(dataToRedeem);
 
     const data: CodeData = {
       ...dataToRedeem,
       merkleProof: proof as Keccak256Hash[],
     };
     setDataToRedeem(data);
-  }, [dataToRedeem, getMerkleProofByData]);
+  }, [dataToRedeem, getMerkleProofByCodeData]);
 
   return (
     <Card>
