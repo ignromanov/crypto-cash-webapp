@@ -4,54 +4,64 @@ import {
   libp2pNode,
 } from "@/services/libp2p";
 import { CodeData } from "@/types/codes";
-import { loadMerkleTree } from "@/utils/merkleTree";
+import { getProofByLeaves } from "@/utils/merkleTree";
 import { useCallback, useEffect } from "react";
 import { UpdateExecStatus } from "./useExecStatus.types";
 
+const createNode = async () => {
+  if (libp2pNode) return;
+  await createLibp2pNode();
+};
+
 const useLibp2pNode = (updateExecStatus: UpdateExecStatus) => {
   useEffect(() => {
-    const createNode = async () => {
-      if (libp2pNode) return;
-      await createLibp2pNode();
-    };
-
     createNode();
 
     return () => {
-      libp2pNode?.stop();
+      (async () => {
+        await libp2pNode?.stop();
+      })();
     };
   }, []);
 
-  const getMerkleProofByData = useCallback(
+  const getMerkleProofByCodeData = useCallback(
     async (data: CodeData) => {
       updateExecStatus({
         message: "Getting proof from IPFS...",
         pending: true,
       });
 
-      const merkleTreeDump = await getFileFromIPFS(data.cid);
-      if (!merkleTreeDump) return;
+      try {
+        const merkleTreeLeaves = (await getFileFromIPFS(data.cid)) as string[];
+        if (!merkleTreeLeaves) throw new Error("No proof found!");
 
-      const merkleTree = loadMerkleTree(merkleTreeDump);
-      const proof = merkleTree.getProof([data.code, data.amount]);
+        const proof = getProofByLeaves(merkleTreeLeaves, [
+          data.code,
+          data.amount,
+        ]);
 
-      if (proof.length === 0) {
-        console.error("No proof found");
-        return;
+        if (proof.length === 0) throw new Error("Proof length is 0.");
+
+        updateExecStatus({
+          message: "The proof has been received successfully!",
+          pending: false,
+          success: true,
+        });
+        return proof;
+      } catch (error) {
+        console.error("Error getting Merkle proof:", error);
+        updateExecStatus({
+          message: "No proof found!",
+          pending: false,
+          success: false,
+        });
+        return null;
       }
-
-      updateExecStatus({
-        message: "The proof has been received successfully!",
-        pending: false,
-        success: true,
-      });
-
-      return proof;
     },
     [updateExecStatus]
   );
 
-  return { libp2pNode, getMerkleProofByData };
+  return { libp2pNode, getMerkleProofByCodeData };
 };
 
 export { useLibp2pNode };

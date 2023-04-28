@@ -100,7 +100,7 @@ const createLibp2pNode = async () => {
 const getFileFromIPFS = async (cidStr: string) => {
   // TODO: use libp2p node to fetch the file
   try {
-    const response = await axios.get<object>(ipfsGatewayUrl + cidStr);
+    const response = await axios.get(ipfsGatewayUrl + cidStr);
     if (response.status === 200) {
       return response.data;
     }

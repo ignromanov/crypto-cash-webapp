@@ -1,6 +1,6 @@
-import { Badge } from "@/components/elements/Badge";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
 import { Libp2pNodeSwitcher } from "@/components/elements/Libp2pNodeSwitcher";
+import { QrCodeImage } from "@/components/elements/QrCodeImage";
 import { Card } from "@/components/layouts/Card";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
@@ -8,9 +8,8 @@ import { useLibp2pNode } from "@/hooks/useLibp2pNode";
 import { CodeData, Keccak256Hash } from "@/types/codes";
 import { parseCodeData } from "@/utils/converters";
 import { generateQrCodeImage } from "@/utils/qrCode";
-import { formatEther } from "ethers/lib/utils";
-import Image from "next/image";
 import React, { useCallback, useState } from "react";
+import { RedeemBadges } from "./RedeemBadges";
 
 const RedeemCode: React.FC = () => {
   const [dataToRedeem, setDataToRedeem] = useState<CodeData | null>(null);
@@ -20,7 +19,8 @@ const RedeemCode: React.FC = () => {
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const hasMerkleProof = !!dataToRedeem?.merkleProof;
 
-  const { libp2pNode, getMerkleProofByData } = useLibp2pNode(updateExecStatus);
+  const { libp2pNode, getMerkleProofByCodeData } =
+    useLibp2pNode(updateExecStatus);
   const {
     handleCommit,
     handleReveal,
@@ -74,14 +74,14 @@ const RedeemCode: React.FC = () => {
   const handleRetrieveProof = useCallback(async () => {
     if (!dataToRedeem) return;
 
-    const proof = await getMerkleProofByData(dataToRedeem);
+    const proof = await getMerkleProofByCodeData(dataToRedeem);
 
     const data: CodeData = {
       ...dataToRedeem,
       merkleProof: proof as Keccak256Hash[],
     };
     setDataToRedeem(data);
-  }, [dataToRedeem, getMerkleProofByData]);
+  }, [dataToRedeem, getMerkleProofByCodeData]);
 
   return (
     <Card>
@@ -96,41 +96,14 @@ const RedeemCode: React.FC = () => {
           className="w-full p-2"
         />
       </div>
-      <div className="mb-4 relative flex items-center justify-center">
-        {qrCodeImage ? (
-          <Image
-            src={qrCodeImage}
-            alt={`QR Code`}
-            width="0"
-            height="0"
-            sizes="100vw"
-            className="w-auto h-1/2 object-contain"
-          />
-        ) : (
-          <div className="w-full h-64 bg-gray-200 rounded flex items-center justify-center">
-            <span className="text-gray-500 text-lg">No QR Code</span>
-          </div>
-        )}
-      </div>
+      <QrCodeImage image={qrCodeImage} />
       {dataToRedeem && (
-        <div className="mb-4 flex items-center justify-center space-x-4 ">
-          <Badge
-            caption={`Amount: ${formatEther(dataToRedeem.amount)}`}
-            status={null}
-          />
-          <Badge
-            caption={hasMerkleProof ? "Proofed" : "No Proof"}
-            status={hasMerkleProof}
-          />
-          <Badge
-            caption={isCodeCommitted ? "Committed" : "Not Committed"}
-            status={isCodeCommitted}
-          />
-          <Badge
-            caption={isCodeRevealed ? "Redeemed" : "Not Redeemed"}
-            status={isCodeRevealed}
-          />
-        </div>
+        <RedeemBadges
+          hasMerkleProof={hasMerkleProof}
+          isCodeCommitted={isCodeCommitted}
+          isCodeRevealed={isCodeRevealed}
+          amount={dataToRedeem.amount}
+        />
       )}
       <div className="flex items-center justify-center">
         <Libp2pNodeSwitcher libp2pNode={libp2pNode} />
@@ -138,7 +111,7 @@ const RedeemCode: React.FC = () => {
           onClick={handleRetrieveProof}
           disabled={!dataToRedeem || hasMerkleProof}
         >
-          {"Retrieve Merkle Proof"}
+          Retrieve Merkle Proof
         </button>
       </div>
       <button

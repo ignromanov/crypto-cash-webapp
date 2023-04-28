@@ -1,7 +1,8 @@
+import { environmentChainId } from "@/constants";
 import {
   ConnectWallet,
+  useActiveChain,
   useAddress,
-  useNetworkMismatch,
   useSwitchChain,
 } from "@thirdweb-dev/react";
 import Image from "next/image";
@@ -9,19 +10,17 @@ import Link from "next/link";
 import React, { useEffect } from "react";
 import { Props } from "./Header.types";
 
-const activeChain = parseInt(process.env.NEXT_PUBLIC_ACTIVE_CHAIN || "1");
-
 const Header: React.FC<Props> = ({ projectName }) => {
-  const address = useAddress(); // Get connected wallet address
-  const switchChain = useSwitchChain(); // Switch to desired chain
-  const isMismatched = useNetworkMismatch(); // Detect if user is connected to the wrong network
+  const activeChain = useActiveChain();
+  const address = useAddress();
+  const switchChain = useSwitchChain();
+  const isMismatched = environmentChainId !== activeChain?.chainId;
 
   useEffect(() => {
-    // Check if the user is connected to the wrong network
-    if (isMismatched) {
-      switchChain(activeChain); // the chain you want here
+    if (address && isMismatched) {
+      switchChain(environmentChainId);
     }
-  }, [address, isMismatched, switchChain]); // This above block gets run every time "address" changes (e.g. when the user connects)
+  }, [address, isMismatched, switchChain]);
 
   return (
     <header className="bg-white border-b border-gray-200 py-4">
