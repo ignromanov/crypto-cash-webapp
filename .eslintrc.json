@@ -6,11 +6,11 @@
     "mongo": true
   },
   "extends": [
+    "next",
     "eslint:recommended",
     "plugin:react/recommended",
     "prettier",
     "plugin:@typescript-eslint/recommended",
-    "next"
   ],
   "globals": {
     "Atomics": "readonly",

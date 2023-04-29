@@ -24,7 +24,7 @@ const Header: React.FC<Props> = ({ projectName }) => {
 
   return (
     <header className="bg-white border-b border-gray-200 py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+      <div className="ml-4 mr-8 px-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"
