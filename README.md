@@ -33,8 +33,8 @@ The application interacts with the CryptoCash smart contracts deployed on the Po
 <p>
 <a href="https://www.loom.com/share/b4a3bb2bb9e24bd38518e0b9396da757">
     <p>CryptoCash Presentation by Ignat Romanov - Watch Video</p>
-    <img width=300px src="https://cdn.loom.com/sessions/thumbnails/b4a3bb2bb9e24bd38518e0b9396da757-1682790379066-with-play.gif" alt="CryptoCash Presentation by Ignat Romanov - Watch Video" />
 </a>
+<img width=300px src="https://cdn.loom.com/sessions/thumbnails/b4a3bb2bb9e24bd38518e0b9396da757-1682790379066-with-play.gif" alt="CryptoCash Presentation by Ignat Romanov - Watch Video" />
 </p>
 
 ---
