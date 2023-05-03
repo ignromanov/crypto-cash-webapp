@@ -1,4 +1,4 @@
-import { ipfsGatewayUrl } from "@/constants";
+import { IPFS_GATEWAY_URL } from "@/constants/ipfs";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { bootstrap } from "@libp2p/bootstrap";
@@ -100,7 +100,7 @@ const createLibp2pNode = async () => {
 const getFileFromIPFS = async (cidStr: string) => {
   // TODO: use libp2p node to fetch the file
   try {
-    const response = await axios.get(ipfsGatewayUrl + cidStr);
+    const response = await axios.get(IPFS_GATEWAY_URL + cidStr);
     if (response.status === 200) {
       return response.data;
     }

@@ -6,7 +6,7 @@ import {
   ApiGenerateCodesResponseData,
   GenerateCodesResponseData,
 } from "@/components/modules/GenerateCodes";
-import { ipfsGatewayUrl } from "@/constants";
+import { IPFS_GATEWAY_URL } from "@/constants/ipfs";
 import { ResponseError } from "@/types/api";
 import { handleApiError } from "@/utils/api";
 import { parseCodeData } from "@/utils/converters";
@@ -49,7 +49,7 @@ const createSecretCodes = async (
         {responseData.merkleRootIndex}] and
         <br />
         Merkle Tree IPFS CID:{" "}
-        <Link href={ipfsGatewayUrl + responseData.ipfsCid}>
+        <Link href={IPFS_GATEWAY_URL + responseData.ipfsCid}>
           {responseData.ipfsCid}
         </Link>
       </span>

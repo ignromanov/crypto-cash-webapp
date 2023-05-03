@@ -1,9 +1,9 @@
-import { environmentChainId, supportedChains } from "@/constants";
+import { ENVIRONMENT_CHAIN_ID, SUPPORTED_CHAINS } from "@/constants/chains";
 import { ConnectWallet } from "@thirdweb-dev/react";
 import React from "react";
 
 const NetworkMismatchModal: React.FC = () => {
-  const chainName = supportedChains[environmentChainId] || "Unknown";
+  const chainName = SUPPORTED_CHAINS[ENVIRONMENT_CHAIN_ID] || "Unknown";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full ">
       <div className="bg-black opacity-50 absolute inset-0" />
