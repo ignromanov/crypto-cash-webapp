@@ -1,4 +1,4 @@
-import { environmentChainId } from "@/constants";
+import { ENVIRONMENT_CHAIN_ID } from "@/constants/chains";
 import {
   ConnectWallet,
   useActiveChain,
@@ -14,11 +14,11 @@ const Header: React.FC<Props> = ({ projectName }) => {
   const activeChain = useActiveChain();
   const address = useAddress();
   const switchChain = useSwitchChain();
-  const isMismatched = environmentChainId !== activeChain?.chainId;
+  const isMismatched = ENVIRONMENT_CHAIN_ID !== activeChain?.chainId;
 
   useEffect(() => {
     if (address && isMismatched) {
-      switchChain(environmentChainId);
+      switchChain(ENVIRONMENT_CHAIN_ID);
     }
   }, [address, isMismatched, switchChain]);
 

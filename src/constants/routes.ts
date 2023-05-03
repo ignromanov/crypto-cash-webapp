@@ -1,4 +1,10 @@
-export const links = [
+interface Route {
+  href: string;
+  label: string;
+  icon: string;
+}
+
+const SIDEBAR_ROUTES: Route[] = [
   {
     href: "/",
     label: "Balances",
@@ -25,8 +31,8 @@ export const links = [
     icon: "/svg/purchase.svg",
   },
   {
-    href: "/invoices",
-    label: "Invoices",
+    href: "/bills",
+    label: "Bills",
     icon: "/svg/invoices.svg",
   },
   {
@@ -35,3 +41,5 @@ export const links = [
     icon: "/svg/debts.svg",
   },
 ];
+
+export { SIDEBAR_ROUTES };

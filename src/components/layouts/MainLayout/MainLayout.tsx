@@ -1,7 +1,7 @@
 import { NetworkMismatchModal } from "@/components/elements/NetworkMismatchModal";
 import { Header } from "@/components/layouts/Header";
 import { Sidebar } from "@/components/layouts/Sidebar";
-import { environmentChainId } from "@/constants";
+import { ENVIRONMENT_CHAIN_ID } from "@/constants/chains";
 import { useActiveChain } from "@thirdweb-dev/react";
 import Head from "next/head";
 import React from "react";
@@ -9,7 +9,7 @@ import { Props } from "./Layout.types";
 
 const MainLayout: React.FC<Props> = ({ projectName, children }) => {
   const activeChain = useActiveChain();
-  const isMismatched = environmentChainId !== activeChain?.chainId;
+  const isMismatched = ENVIRONMENT_CHAIN_ID !== activeChain?.chainId;
 
   return (
     <div className="min-h-screen bg-gray-100">
