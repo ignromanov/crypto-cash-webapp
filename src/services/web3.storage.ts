@@ -1,6 +1,7 @@
 import { jsonToFilelike } from "@/utils/converters";
 import { Web3Storage } from "web3.storage";
 
+const isProduction = process.env.NODE_ENV === "production";
 const web3StorageApiToken = process.env.WEB3_STORAGE_API_TOKEN;
 let web3StorageClient: Web3Storage | null = null;
 
@@ -40,7 +41,8 @@ const uploadMerkleLeavesToWeb3Storage = async (
   const merkleRoot = merkleLeaves[0];
   const fileName = `${merkleRoot}.json`;
   const pinName = `CSH Tree [${merkleRootIndex}] 
-    ${merkleRoot.slice(0, 7)}...${merkleRoot.slice(-5)}`;
+    ${merkleRoot.slice(0, 7)}...${merkleRoot.slice(-5)} 
+    ${isProduction ? "" : "(local)"}`;
 
   const merkleTreeCid = await uploadToWeb3Storage(
     JSON.stringify(merkleLeaves),

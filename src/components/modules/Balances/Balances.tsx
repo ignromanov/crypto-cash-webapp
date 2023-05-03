@@ -1,16 +1,10 @@
 import { Card } from "@/components/layouts/Card";
 import {
-  CSHTokenType,
-  cSHTokenContractAbi,
-  cSHTokenContractAddress,
-} from "@/contracts/cSHToken";
-import {
-  CodesFactoryContractType,
-  codesFactoryContractAbi,
   codesFactoryContractAddress,
 } from "@/contracts/codesFactory";
+import useCSHContract from "@/hooks/useCSHContract";
+import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import { useAddress, useSigner } from "@thirdweb-dev/react";
-import { ethers } from "ethers";
 import { formatEther } from "ethers/lib/utils";
 import React, { useEffect, useState } from "react";
 
@@ -26,40 +20,31 @@ const Balances: React.FC = () => {
   const [codesFactoryTokenBalance, setCodesFactoryTokenBalance] = useState("");
   const [merkleRoots, setMerkleRoots] = useState<string[]>([]);
 
+  const { fetchTokenBalance } = useCSHContract();
+  const { fetchMerkleRoots } = useCodesFactoryContract()
+
   useEffect(() => {
     if (!signer || !account || isMismatched) {
       return;
     }
 
     const fetchData = async () => {
-      const cSHTokenContractRead: CSHTokenType = new ethers.BaseContract(
-        cSHTokenContractAddress,
-        cSHTokenContractAbi,
-        signer
-      );
-      const codesFactoryContractRead: CodesFactoryContractType =
-        new ethers.BaseContract(
-          codesFactoryContractAddress,
-          codesFactoryContractAbi,
-          signer
-        );
-
       // Get Ether balance
       const ethBalance = await signer.getBalance();
       setEthBalance(formatEther(ethBalance));
 
       // Get CSHToken balance
-      const cSHTokenBalance = await cSHTokenContractRead.balanceOf(account);
-      setCSHTokenBalance(formatEther(cSHTokenBalance));
+      const cSHTokenBalance = await fetchTokenBalance();
+      setCSHTokenBalance(cSHTokenBalance);
 
       // Get CodesFactory token balance
-      const codesFactoryTokenBalance = await cSHTokenContractRead.balanceOf(
+      const codesFactoryTokenBalance = await fetchTokenBalance(
         codesFactoryContractAddress
       );
-      setCodesFactoryTokenBalance(formatEther(codesFactoryTokenBalance));
+      setCodesFactoryTokenBalance(codesFactoryTokenBalance);
 
       // Get Merkle roots
-      const merkleRoots = await codesFactoryContractRead.getMerkleRoots();
+      const merkleRoots = await fetchMerkleRoots();
       setMerkleRoots(merkleRoots);
     };
 
@@ -73,7 +58,7 @@ const Balances: React.FC = () => {
     return () => {
       clearInterval(intervalId);
     };
-  }, [signer, account, isMismatched]);
+  }, [signer, account, isMismatched, fetchTokenBalance, fetchMerkleRoots]);
 
   return (
     <Card>

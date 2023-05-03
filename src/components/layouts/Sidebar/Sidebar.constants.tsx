@@ -15,6 +15,11 @@ export const links = [
     icon: "/svg/code-redemption.svg",
   },
   {
+    href: "/transfer",
+    label: "Transfer",
+    icon: "/svg/transfer.svg",
+  },
+  {
     href: "/purchase",
     label: "Purchase",
     icon: "/svg/purchase.svg",

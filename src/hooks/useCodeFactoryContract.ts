@@ -11,7 +11,7 @@ import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { UpdateExecStatus } from "./useExecStatus.types";
 
-const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
+const useCodesFactoryContract = (updateExecStatus?: UpdateExecStatus) => {
   // TODO: waiting for Metamask ext fix
   // const isMismatched = useNetworkMismatch();
   const isMismatched = false;
@@ -22,7 +22,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
     useState<CodesFactoryContractType | null>(null);
 
   useEffect(() => {
-    if (!signer || isMismatched) {
+    if (!signer || isMismatched || !updateExecStatus) {
       setCodesFactoryContract(null);
       return;
     }
@@ -38,7 +38,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
 
   const handleCommit = useCallback(
     async (dataToRedeem: CodeData | null): Promise<boolean> => {
-      if (!dataToRedeem || !codesFactoryContract) {
+      if (!dataToRedeem || !codesFactoryContract || !updateExecStatus) {
         return false;
       }
 
@@ -85,7 +85,7 @@ const useCodesFactoryContract = (updateExecStatus: UpdateExecStatus) => {
 
   const handleReveal = useCallback(
     async (dataToRedeem: CodeData | null): Promise<boolean> => {
-      if (!dataToRedeem || !codesFactoryContract) {
+      if (!dataToRedeem || !codesFactoryContract || !updateExecStatus) {
         return false;
       }
 
