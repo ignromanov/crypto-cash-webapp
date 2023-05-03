@@ -1,8 +1,8 @@
 <!-- Code Generation Icon -->
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M4 8L12 4L20 8V16L12 20L4 16V8Z" stroke="#1CD3A2" stroke-width="2" fill="none"/>
-  <path d="M10 10L14 14" stroke="#FFB800" stroke-width="2"/>
-  <path d="M14 10L10 14" stroke="#FFB800" stroke-width="2"/>
+  <path d="M9 9L15 15" stroke="#FFB800" stroke-width="2"/>
+  <path d="M15 9L9 15" stroke="#FFB800" stroke-width="2"/>
   <path d="M8 12H16" stroke="#1CD3A2" stroke-width="2"/>
   <path d="M12 8V16" stroke="#1CD3A2" stroke-width="2"/>
 </svg>
