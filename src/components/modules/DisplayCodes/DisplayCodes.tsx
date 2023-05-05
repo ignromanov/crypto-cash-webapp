@@ -1,26 +1,22 @@
 import { Badge } from "@/components/elements/Badge";
 import { ExecStatusDisplay } from "@/components/elements/ExecStatusDisplay";
+import { QrCodeRedeemBadge } from "@/components/elements/QRCode";
 import { Card } from "@/components/layouts/Card";
 import useCodesFactoryContract from "@/hooks/useCodeFactoryContract";
 import useExecStatus from "@/hooks/useExecStatus";
 import useGetSecretCodesApi from "@/hooks/useGetSecretCodesApi";
-import { Keccak256Hash } from "@/types/codes";
-import { stringifyCodeData } from "@/utils/converters";
-import { generateQrCodeImage } from "@/utils/qrCode";
-import Image from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 
 const DisplayCodes: React.FC = () => {
   const [merkleRootCode, setMerkleRootCode] = useState("");
   const [includeProof, setIncludeProof] = useState(false);
-  const [redeemedLeaves, setRedeemedLeaves] = useState<Keccak256Hash[]>([]);
-  const [qrCodesImages, setQrCodesImages] = useState<string[]>([]);
+  const [redeemedLeaves, setRedeemedLeaves] = useState<string[]>([]);
   const [merkleRoots, setMerkleRoots] = useState<string[]>([]);
 
   const [execStatus, updateExecStatus, clearExecStatus] = useExecStatus();
   const { filterRedeemedLeaves, fetchMerkleRoots } =
     useCodesFactoryContract(updateExecStatus);
-  const { codesData, amount, sendRequest } =
+  const { codesData, codesDataStr, amount, sendRequest } =
     useGetSecretCodesApi(updateExecStatus);
 
   useEffect(() => {
@@ -28,16 +24,10 @@ const DisplayCodes: React.FC = () => {
       const merkleRoots = await fetchMerkleRoots();
       setMerkleRoots(merkleRoots);
     };
+
     fetch();
-
-    // update MerkleRoots every 5 seconds
-    const intervalId = setInterval(() => {
-      fetch();
-    }, 5000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
+    const intervalId = setInterval(fetch, 5000);
+    return () => clearInterval(intervalId);
   }, [fetchMerkleRoots]);
 
   const handleSubmit = useCallback(
@@ -52,21 +42,20 @@ const DisplayCodes: React.FC = () => {
         });
         return;
       }
-      setQrCodesImages([]);
       clearExecStatus();
 
-      const { codesDataStr, codesData } = await sendRequest(
-        merkleRootCode,
-        includeProof
-      );
-
-      const images = await Promise.all(codesDataStr.map(generateQrCodeImage));
-      setQrCodesImages(images);
+      const { codesData } = await sendRequest(merkleRootCode, includeProof);
 
       const redeemedLeaves = await filterRedeemedLeaves(
         codesData.map(({ leaf }) => leaf)
       );
       setRedeemedLeaves(redeemedLeaves);
+
+      updateExecStatus({
+        pending: false,
+        success: true,
+        message: "QR codes fetched successfully!",
+      });
     },
     [
       merkleRootCode,
@@ -77,59 +66,6 @@ const DisplayCodes: React.FC = () => {
       updateExecStatus,
     ]
   );
-
-  const handleQrCodeClick = useCallback(
-    async (codeIndex: number) => {
-      try {
-        await navigator.clipboard.writeText(
-          stringifyCodeData(codesData[codeIndex])
-        );
-        updateExecStatus({
-          pending: false,
-          success: true,
-          message: "QR code data copied to clipboard",
-        });
-      } catch (error) {
-        console.error(error);
-        updateExecStatus({
-          pending: false,
-          success: false,
-          message: "Failed to copy QR code to clipboard",
-        });
-      }
-    },
-    [codesData, updateExecStatus]
-  );
-
-  const renderQrCodeImage = (qrCodeImage: string, index: number) => {
-    const isCodeRedeemed = redeemedLeaves.includes(codesData[index].leaf);
-
-    return (
-      <div
-        key={index}
-        className="bg-gray-100 p-4 rounded-lg hover:cursor-pointer"
-        onClick={() => handleQrCodeClick(index)}
-      >
-        <div className="relative">
-          <Image
-            src={qrCodeImage}
-            alt={`QR Code ${index + 1}`}
-            width="0"
-            height="0"
-            sizes="100vw"
-            className="w-full h-auto"
-          />
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <Badge
-              caption={isCodeRedeemed ? "Redeemed" : "Not Redeemed"}
-              status={isCodeRedeemed}
-              textSize="text-xs"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <Card>
@@ -180,9 +116,22 @@ const DisplayCodes: React.FC = () => {
         </p>
       )}
 
-      {qrCodesImages.length > 0 && (
+      {codesDataStr.length > 0 && (
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {qrCodesImages.map(renderQrCodeImage)}
+          {codesDataStr.map((dataStr, index) => {
+            const isCodeRedeemed = redeemedLeaves.includes(
+              codesData[index].leaf
+            );
+            return (
+              <QrCodeRedeemBadge
+                key={index}
+                dataStr={dataStr}
+                index={index}
+                isCodeRedeemed={isCodeRedeemed}
+                updateExecStatus={updateExecStatus}
+              />
+            );
+          })}
         </div>
       )}
     </Card>

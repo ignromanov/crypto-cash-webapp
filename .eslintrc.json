@@ -30,6 +30,7 @@
     }
   },
   "rules": {
+    "@next/next/no-html-link-for-pages": ["error", "frontend/src/pages/"],
     "prettier/prettier": "error",
     "react/prop-types": "off",
     "no-console": "off",

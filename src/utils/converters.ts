@@ -1,4 +1,3 @@
-import { CodeData } from "@/types/codes";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { Filelike } from "web3.storage";
 import { JsonObject } from "./converters.types";
@@ -13,9 +12,9 @@ const parseBigIntValue = (key: string, value: unknown) => {
   return value;
 };
 
-const stringifyCodeData = (codeData: CodeData): string =>
+const stringifyCodeData = <T>(codeData: T): string =>
   JSON.stringify(codeData, stringifyBigIntValue);
-const parseCodeData = (codeDataStr: string): CodeData =>
+const parseCodeData = <T>(codeDataStr: string): T =>
   JSON.parse(codeDataStr, parseBigIntValue);
 
 const jsonToFilelike = (json: JsonObject): Filelike => {

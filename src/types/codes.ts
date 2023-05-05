@@ -4,7 +4,7 @@ type HashBrand = {
 
 type Keccak256Hash = string & HashBrand;
 
-interface CodeData {
+interface SecretCodeData {
   rootIndex: string;
   code: string;
   amount: bigint;
@@ -13,4 +13,4 @@ interface CodeData {
   merkleProof?: Keccak256Hash[];
 }
 
-export type { Keccak256Hash, CodeData };
+export type { Keccak256Hash, SecretCodeData, BillCodeData };

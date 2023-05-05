@@ -44,6 +44,7 @@ const GenerateCodes: React.FC = () => {
             type="number"
             id="numOfCodes"
             value={numberOfCodes}
+            placeholder="Enter the number of secret codes"
             onChange={(e) => setNumberOfCodes(e.target.value)}
             className="w-full p-2"
           />
@@ -55,6 +56,7 @@ const GenerateCodes: React.FC = () => {
           <input
             type="number"
             id="amount"
+            placeholder="Enter the token amount per code"
             onChange={(e) => setAmount(e.target.value)}
             className="w-full p-2"
           />

@@ -3,7 +3,7 @@ import {
   getFileFromIPFS,
   libp2pNode,
 } from "@/services/libp2p";
-import { CodeData } from "@/types/codes";
+import { SecretCodeData } from "@/types/codes";
 import { getProofByLeaves } from "@/utils/merkleTree";
 import { useCallback, useEffect } from "react";
 import { UpdateExecStatus } from "./useExecStatus.types";
@@ -25,7 +25,7 @@ const useLibp2pNode = (updateExecStatus: UpdateExecStatus) => {
   }, []);
 
   const getMerkleProofByCodeData = useCallback(
-    async (data: CodeData) => {
+    async (data: SecretCodeData) => {
       updateExecStatus({
         message: "Getting proof from IPFS...",
         pending: true,

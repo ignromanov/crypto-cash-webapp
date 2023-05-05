@@ -3,7 +3,7 @@ import {
   codesFactoryContractAbi,
   codesFactoryContractAddress,
 } from "@/contracts/codesFactory";
-import { CodeData, Keccak256Hash } from "@/types/codes";
+import { Keccak256Hash, SecretCodeData } from "@/types/codes";
 import { handleApiError } from "@/utils/api";
 import { calculateHash, generateRandomNonce } from "@/utils/secretCodes";
 import { useAddress, useSigner } from "@thirdweb-dev/react";
@@ -34,10 +34,10 @@ const useCodesFactoryContract = (updateExecStatus?: UpdateExecStatus) => {
         signer
       );
     setCodesFactoryContract(codesFactoryContract);
-  }, [signer, isMismatched]);
+  }, [signer, isMismatched, updateExecStatus]);
 
   const handleCommit = useCallback(
-    async (dataToRedeem: CodeData | null): Promise<boolean> => {
+    async (dataToRedeem: SecretCodeData | null): Promise<boolean> => {
       if (!dataToRedeem || !codesFactoryContract || !updateExecStatus) {
         return false;
       }
@@ -84,7 +84,7 @@ const useCodesFactoryContract = (updateExecStatus?: UpdateExecStatus) => {
   );
 
   const handleReveal = useCallback(
-    async (dataToRedeem: CodeData | null): Promise<boolean> => {
+    async (dataToRedeem: SecretCodeData | null): Promise<boolean> => {
       if (!dataToRedeem || !codesFactoryContract || !updateExecStatus) {
         return false;
       }
@@ -158,7 +158,7 @@ const useCodesFactoryContract = (updateExecStatus?: UpdateExecStatus) => {
   );
 
   const filterCommitedCodes = useCallback(
-    async (codesData: CodeData[]): Promise<CodeData[]> => {
+    async (codesData: SecretCodeData[]): Promise<SecretCodeData[]> => {
       if (!codesData.length || !codesFactoryContract || !account) return [];
 
       const commitments = await codesFactoryContract.getUserCommitments(

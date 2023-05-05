@@ -8,6 +8,7 @@ import {
 } from "@/components/modules/GenerateCodes";
 import { IPFS_GATEWAY_URL } from "@/constants/ipfs";
 import { ResponseError } from "@/types/api";
+import { SecretCodeData } from "@/types/codes";
 import { handleApiError } from "@/utils/api";
 import { parseCodeData } from "@/utils/converters";
 import axios from "axios";
@@ -89,13 +90,7 @@ const getSecretCodes = async (
     }
 
     const responseData = response.data as GetCodesResponseData;
-    const codesData = responseData.codesData.map(parseCodeData);
-
-    updateExecStatus({
-      pending: false,
-      success: true,
-      message: "QR codes fetched successfully!",
-    });
+    const codesData = responseData.codesData.map(parseCodeData<SecretCodeData>);
 
     return {
       amount: responseData.amount,

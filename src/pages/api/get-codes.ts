@@ -5,7 +5,7 @@ import {
 import CodesTreeModel from "@/models/CodesTreeModel";
 import { ICodesTree } from "@/models/CodesTreeModel.types";
 import connectToDatabase from "@/services/mongoose";
-import { CodeData, Keccak256Hash } from "@/types/codes";
+import { Keccak256Hash, SecretCodeData } from "@/types/codes";
 import { stringifyCodeData } from "@/utils/converters";
 import { loadMerkleTree } from "@/utils/merkleTree";
 import { formatEther, parseEther } from "ethers/lib/utils";
@@ -39,7 +39,7 @@ async function getCodes(
     const codesData = await Promise.all(
       codesTree.secretCodes.map(async (code, index) => {
         const leaf = merkleTree.leafHash([code, amount]) as Keccak256Hash;
-        const codeData: CodeData = {
+        const codeData: SecretCodeData = {
           rootIndex: codesTree.merkleRootIndex,
           code,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment

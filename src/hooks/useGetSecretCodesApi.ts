@@ -1,15 +1,17 @@
 import { getSecretCodes } from "@/services/api";
-import { CodeData } from "@/types/codes";
+import { SecretCodeData } from "@/types/codes";
 import { useCallback, useState } from "react";
 import { UpdateExecStatus } from "./useExecStatus.types";
 
 const useGetSecretCodesApi = (updateExecStatus: UpdateExecStatus) => {
-  const [codesData, setCodesData] = useState<CodeData[]>([]);
+  const [codesData, setCodesData] = useState<SecretCodeData[]>([]);
+  const [codesDataStr, setCodesDataStr] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
 
   const sendRequest = useCallback(
     async (merkleRootCode: string, includeProof: boolean) => {
       setCodesData([]);
+      setCodesDataStr([]);
       setAmount("");
 
       const { amount, codesDataStr, codesData } = await getSecretCodes(
@@ -19,6 +21,7 @@ const useGetSecretCodesApi = (updateExecStatus: UpdateExecStatus) => {
       );
 
       setCodesData(codesData);
+      setCodesDataStr(codesDataStr);
       setAmount(amount);
 
       return { codesDataStr, codesData };
@@ -26,7 +29,7 @@ const useGetSecretCodesApi = (updateExecStatus: UpdateExecStatus) => {
     [updateExecStatus]
   );
 
-  return { codesData, amount, sendRequest };
+  return { codesData, codesDataStr, amount, sendRequest };
 };
 
 export default useGetSecretCodesApi;
